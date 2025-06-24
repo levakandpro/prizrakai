@@ -2,4 +2,9 @@ Flask
 flask_login
 flask_dance
 requests
+requests-oauthlib
+oauthlib
 edge-tts
+aiofiles
+werkzeug
+itsdangerous
