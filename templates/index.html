@@ -1,0 +1,985 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>ИИ Озвучка – Prizrak AI Аудиогенератор</title>
+
+  <meta name="description" content="Создавай озвучку мирового уровня — выбери голос, вбей текст и скачай результат. Быстро. Красиво. AI.">
+  <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='icons/priz2.svg') }}">
+
+</head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<!-- Шрифты -->
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Russo+One&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Rubik+Mono+One&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap&subset=cyrillic" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Julius+Sans+One&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@800&family=Sora:wght@600&display=swap" rel="stylesheet">
+
+
+<!-- Иконки -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+<!-- Стили -->
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=1717">
+
+<!-- Favicon -->
+<link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
+  <style>    
+body {
+  margin: 0;
+  padding: 0;
+  background: #0a0015 url('/static/bg/space-dark.png') no-repeat center center fixed;
+  background-size: cover;
+  font-family: 'Lexend', sans-serif;
+  color: var(--clr-text);
+}
+:root {
+  --clr-text: #ffffff;
+}
+    .card { background: rgba(0,0,0,0.65); border:1px solid rgba(255,255,255,0.08); border-radius:20px; padding:40px; box-shadow:0 8px 32px rgba(0,0,0,0.7); backdrop-filter:blur(20px); }
+    h2, label { color:#ffffff; }
+    option { background:#1d1d1d; color:#f1f1f1; }
+    .history-item { background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.1); border-radius:12px; padding:12px 16px; margin-bottom:16px; color:#fff; }
+    .custom-player { display:flex; align-items:center; gap:10px; background:rgba(255,255,255,0.05); padding:10px 14px; border-radius:12px; font-size:14px; user-select:none; color:#fff; }
+    .play-btn { background:none; border:none; color:#ff00cc; font-size:20px; cursor:pointer; }
+    .bar-bg { flex:1; height:6px; background:rgba(255,255,255,0.1); border-radius:3px; overflow:hidden; }
+    .bar-fill { height:100%; width:0; background:linear-gradient(90deg,#ff00cc,#3333ff); transition:width 0.1s ease; }
+    .download-link { color:#ff00cc; text-decoration:none; font-size:16px; padding-left:6px; }
+    .mic-btn { display:inline-flex; align-items:center; justify-content:center; gap:10px; padding:14px 32px; background:linear-gradient(135deg,#7028CC,#8A3F8E); border-radius:30px; border:1px solid rgba(255,255,255,0.1); font-family:'Russo One',sans-serif; font-size:16px; text-transform:uppercase; letter-spacing:1px; color:#FFF; cursor:pointer; box-shadow:0 4px 12px rgba(0,0,0,0.5); transition:transform .25s ease,box-shadow .25s ease; }
+  </style>
+  
+</head>
+<body style="display: flex; flex-direction: column; min-height: 100vh;">
+  <video id="video-bg" autoplay muted loop playsinline
+         style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; object-fit: cover; z-index: -1; pointer-events: none;">
+    <source src="{{ url_for('static', filename='bg/space-dark.mp4') }}" type="video/mp4">
+  </video>
+
+<div id="ghostLoader" class="ghost-enter">
+  <div class="ghost-wrapper">
+    <div class="ghost-effects">
+      <div class="portal"></div>
+      <div class="mist"></div>
+    </div>
+    <img id="ghostGif" src="/static/ghost.gif" alt="Призрак" width="120" height="120" />
+    <div class="ghost-text" id="ghostText">Озвучка...</div>
+  </div>
+</div>
+<div id="ghostPopup" style="display: none;">
+  👻 Бууу! Твоё аудио готово!
+  <div id="quoteLine" style="margin-top: 6px; font-size: 13px;"></div>
+</div>
+<div class="container">
+  <div class="card" id="mainCard" style="margin-top: 55px;">
+
+<div class="card-back" style="display: none; flex-direction: column; align-items: center; gap: 24px;">
+  <iframe
+    id="ytIframe"
+    width="960"
+    height="540"
+    src=""
+    frameborder="0"
+    allow="encrypted-media"
+    allowfullscreen
+style="border-radius: 12px; box-shadow: 0 40px 120px rgba(0, 0, 0, 0.9);"
+
+  ></iframe>
+  <button id="closeVideoBtn" class="mic-btn" style="margin-top: 12px;">ЗАКРЫТЬ</button>
+</div>
+    <div class="card-front">
+      <h2 class="title-with-visualizer">
+        <span class="gradient-text">TTS GENERATOR</span>
+        <span id="volumeDisplay" class="volume-percent">60%</span>
+        <span id="volumeHint" class="volume-hint-text">Наведи для громкости</span>
+      </h2>
+</div>
+<div id="iconPanel" class="tts-header-with-icon">
+<div class="icon-bar-strict">
+  <div id="ambientSoundToggle" class="tooltip-hover" data-tooltip="Фоновый шум: дождь">
+    <img src="/static/icons/rain.svg" alt="Ambient" class="noise-icon-svg" id="ambientIcon">
+  </div>
+  <div id="txtUploadBtn" class="tooltip-hover" data-tooltip="Загрузить .txt">
+    <img src="/static/icons/document.svg" alt="Загрузить текст" class="noise-icon-svg">
+    <input type="file" id="txtInput" accept=".txt" style="display: none;">
+  </div>
+  <div id="langToggleBtn" class="tooltip-hover" data-tooltip="Сменить язык">
+    <img src="/static/icons/translate.svg" alt="Язык" class="noise-icon-svg">
+  </div>
+  <div id="visualizerBtn" class="tooltip-hover" data-tooltip="Инструкция по озвучке">
+    <img src="/static/icons/tv.svg" alt="TV" class="noise-icon-svg">
+  </div>
+<div class="generation-indicator tooltip-hover" data-tooltip="Осталось генераций">
+<span class="label">{{ remaining_generations }}/10</span>
+</div>
+</div>
+<div id="formBlock">
+  <form method="POST">
+    <div class="mb-3">
+<div style="position: relative;">
+  <textarea name="text" id="mainTextarea" class="form-control" rows="5"
+            placeholder="Напишите, что озвучить..." style="padding-right: 30px;">{{ last_text }}</textarea>
+  <!-- Кнопка «крестик» -->
+  <div id="clearTextareaBtn"
+       style="position: absolute; top: 10px; right: 10px; font-size: 18px; color: #aaa; cursor: pointer; display: none;">
+    ×
+  </div>
+  <!-- Кнопка «восстановить» (скрыта по умолчанию) -->
+  <div id="restoreTextBtn"
+       style="position: absolute; top: 10px; right: 10px; font-size: 18px; color: #ff99ff; cursor: pointer; display: none;">
+    ⟲
+  </div>
+</div>
+<div id="charCount" style="display: flex; align-items: center; gap: 8px; margin-top: 4px;">
+  <div class="bar-bg">
+    <div class="bar-fill"></div>
+  </div>
+  <span id="remaining">5000/5000</span>
+</div>
+        </div>
+        <div class="mb-3">
+          <div class="custom-select-wrapper">
+            <div class="custom-select-trigger" data-placeholder="ВЫБЕРИТЕ ГОЛОС" data-last="{{ last_voice }}"></div>
+            <div class="custom-options">
+             
+{% for v in voices %}
+  <div class="custom-option" data-value="{{ v['ShortName'] }}">
+    {% set lang = v['ShortName'].split('-')[0] %}
+    <img src="{{ url_for('static', filename='icons/flags/' ~ lang ~ '.svg') }}"
+         alt="{{ lang }}"
+         style="width: 16px; height: 16px; margin-right: 6px; vertical-align: middle;">
+    {{ v['FriendlyName'] }}
+    <span class="voice-fav" data-id="{{ v['ShortName'] }}">★</span>
+  </div>
+{% endfor %}
+
+            </div>
+            <input type="hidden" name="voice" id="voiceInput" required>
+            
+          </div>
+        </div>
+<div class="btn-line-wrapper" style="text-align: center">
+<button type="submit" class="mic-btn" id="generateBtn">
+  <span class="spinner" id="spinner" style="display: none;"></span>
+  <i class="fas fa-microphone-alt" id="micIcon"></i>
+  <span id="btnText">ОЗВУЧИТЬ</span>
+</button>
+
+</div>       
+</form> <!-- Закрыли основную форму озвучки -->
+{% if history %}
+<div class="d-flex justify-content-between align-items-center mt-4 mb-2">
+  <h4 class="history-title">История</h4>
+<div class="history-actions">
+
+  <!-- 🧹 Очистить -->
+<button type="button" id="clearHistoryBtn" class="delete-btn tooltip-hover" data-tooltip="Очистить всё">
+
+    <img src="/static/icons/delete.svg" alt="Удалить" class="delete-icon">
+  </button>
+
+  <!-- 🌫️ Разделитель -->
+  <div class="history-divider"></div>
+
+  <!-- 💾 Скачать всё -->
+  <form action="/download_all" method="post" style="display: inline;">
+    <button type="submit" class="download-all-btn tooltip-hover" data-tooltip="Скачать всё как ZIP">
+      <img src="/static/icons/zip.svg" alt="Скачать" class="download-icon">
+    </button>
+  </form>
+</div>
+</div>
+</div>
+<div id="clearMsg" style="color:#66ff99; font-size:14px; margin-bottom: 8px; display:none; transition:opacity 0.4s ease;"></div>
+
+<div id="historyListWrapper">
+  <div id="history-list">
+          {% for item in history %}
+          <div class="history-item">
+            <div class="d-flex justify-content-between align-items-center mb-1">
+              <b>{{ item.voice }}</b><small>{{ item.timestamp }}</small>
+            </div>
+            <div class="custom-player" data-src="{{ url_for('static', filename=item.filename) }}">
+<button class="play-btn">▶</button>
+<span class="time duration-seconds">--:--</span>
+
+              <div class="bar-bg"><div class="bar-fill"></div></div>
+              <div class="download-links">
+<a class="download-btn download-mp3"
+   href="#"
+   data-filename="{{ item.filename }}">
+  <i class="fas fa-file-audio"></i><span>MP3</span>
+</a>
+  <a class="download-btn download-wav" href="{{ url_for('static', filename=item.wav) }}" download>
+  </a>
+</div>
+            </div>
+          </div>
+          {% endfor %}
+          </div> <!-- закрытие #historyListWrapper -->
+
+        </div>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+<script>
+  const form = document.querySelector("form");
+  const ghostLoader = document.getElementById("ghostLoader")
+  form.addEventListener("submit", () => {
+    ghostLoader.style.display = "flex";
+  });
+document.addEventListener("DOMContentLoaded", () => {
+  const form = document.querySelector("form");
+  const ghostLoader = document.getElementById("ghostLoader");
+  const ghostGif = document.getElementById("ghostGif");
+  const ghostText = document.getElementById("ghostText");
+  const ghostPopup = document.getElementById("ghostPopup");
+  const ghostPhrases = [
+    "👻 Призрак озвучивает...",
+    "💬 Подключаемся к духу речи...",
+    "🧠 Обработка магических символов...",
+    "📡 Передача сигнала в звуковой эфир...",
+    "🔮 Синтез голограммы голоса..."
+  ];
+  window.addEventListener("load", () => {
+    ghostLoader.classList.remove("active");
+const quoteLine = document.getElementById("quoteLine");
+const quote = quotes[Math.floor(Math.random() * quotes.length)];
+quoteLine.textContent = quote;
+    // анимация исчезновения призрака
+    ghostGif.classList.add("hidden");
+
+    ghostPopup.classList.add("active");
+    setTimeout(() => {
+      ghostPopup.classList.remove("active");
+      ghostGif.classList.remove("hidden"); // сброс анимации для следующего вызова
+    }, 2800);
+  });
+});
+const quotes = [
+  "💭 Иногда даже духам нужен голос.",
+  "🪄 Всё сказанное — становится вечным.",
+  "🔊 Вдох… и звук оживает.",
+  "👁️ Не смотри назад — теперь ты озвучен.",
+  "🌀 Слова вызваны из глубины кода."
+]; 
+</script>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const trigger = document.querySelector('.custom-select-trigger');
+  const options = document.querySelector('.custom-options');
+  const wrapper = document.querySelector('.custom-select-wrapper');
+  const voiceInput = document.getElementById('voiceInput');
+
+  if (trigger && options && wrapper && voiceInput) {
+    trigger.addEventListener('click', () => {
+      const isOpen = options.classList.contains('open');
+      options.classList.toggle('open');
+      options.style.display = isOpen ? 'none' : 'block';
+    });
+
+    options.querySelectorAll('.custom-option').forEach(option => {
+      option.addEventListener('click', () => {
+        trigger.textContent = option.textContent;
+        voiceInput.value = option.dataset.value;
+        options.classList.remove('open');
+        options.style.display = 'none';
+      });
+    });
+
+    document.addEventListener('click', e => {
+      if (!wrapper.contains(e.target)) {
+        options.classList.remove('open');
+        options.style.display = 'none';
+      }
+    });
+  }
+});
+
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const opts = Array.from(document.querySelectorAll('.custom-options .custom-option'));
+  const ru = opts.filter(o => o.dataset.value.startsWith('ru'));
+  const en = opts.filter(o => o.dataset.value.startsWith('en'));
+  const container = document.querySelector('.custom-options');
+opts.forEach(o => o.remove());
+
+  const h1 = document.createElement('div');
+  h1.className = 'custom-option disabled-group';
+  h1.textContent = '🇷🇺 Русские голоса';
+  container.append(h1, ...ru);
+
+  const h2 = document.createElement('div');
+  h2.className = 'custom-option disabled-group';
+  h2.textContent = '🇺🇸 English voices';
+  container.append(h2, ...en);
+});
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const trg = document.querySelector('.custom-select-trigger[data-placeholder]');
+  if (trg) trg.textContent = '';
+});
+</script>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const trigger = document.querySelector('.custom-select-trigger');
+  const input = document.getElementById('voiceInput');
+  const last = trigger?.dataset.last;
+  if (!trigger || !input) return;
+  const opts = Array.from(document.querySelectorAll('.custom-option')).filter(opt =>
+    !opt.classList.contains('disabled-group')
+  );
+ if (last && !input.value) {
+    const matched = opts.find(o => o.dataset.value === last);
+    if (matched) {
+      input.value = last;
+      trigger.textContent = matched.textContent.replace('★', '').trim();
+    }
+  }
+  opts.forEach(opt => {
+    opt.addEventListener('click', () => {
+      trigger.textContent = opt.textContent.replace('★', '').trim();
+      input.value = opt.dataset.value;
+    });
+  });
+});
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const textarea = document.querySelector('textarea[name="text"]');
+  const restoreBtn = document.getElementById('restoreTextBtn');
+  const storageKey = 'tts_saved_text';
+  // Если кнопки нет — ничего не делать
+  if (!restoreBtn) return;
+  // Показать кнопку, если есть текст
+  const savedText = localStorage.getItem(storageKey);
+  if (savedText && textarea.value.trim() === '') {
+    restoreBtn.style.display = 'inline-block';
+  } else {
+    restoreBtn.style.display = 'none';
+  }
+  // Автосохранение
+  textarea.addEventListener('input', () => {
+    localStorage.setItem(storageKey, textarea.value);
+    restoreBtn.style.display = 'none';
+  });
+  // Восстановить
+  restoreBtn.addEventListener('click', () => {
+    textarea.value = savedText;
+    textarea.style.boxShadow = '0 0 10px #66ff99';
+    setTimeout(() => textarea.style.boxShadow = 'none', 500);
+    restoreBtn.style.display = 'none';
+  });
+  // Очистка при отправке
+  document.querySelector('form')?.addEventListener('submit', () => {
+    localStorage.removeItem(storageKey);
+  });
+});
+</script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const textarea      = document.getElementById('mainTextarea');
+    const clearBtn      = document.getElementById('clearTextareaBtn');
+    const restoreBtn    = document.getElementById('restoreTextBtn');
+    // Запоминаем исходное значение textarea при загрузке страницы
+    const lastText = textarea.value;
+    // Показываем или скрываем «крестик» в зависимости от наличия текста
+    function toggleClearButton() {
+      if (textarea.value.length > 0) {
+        clearBtn.style.display   = 'block';
+      } else {
+        clearBtn.style.display   = 'none';
+      }
+    }
+    // Обработчик клика по «крестику»: очищаем содержимое и переключаем видимость кнопок
+    clearBtn.addEventListener('click', () => {
+      textarea.value         = '';
+      clearBtn.style.display = 'none';
+      restoreBtn.style.display = 'block';
+    });
+   // Обработчик клика по «восстановить»: возвращаем первоначальный текст, переключаем кнопки обратно
+    restoreBtn.addEventListener('click', () => {
+      textarea.value               = lastText;
+      restoreBtn.style.display     = 'none';
+      clearBtn.style.display       = 'block';
+    });
+    // Скрываем кнопку «восстановить» сразу при загрузке
+    restoreBtn.style.display = 'none';
+    // Обновляем вид «крестика» при любом изменении текста (ввод или удаление)
+    textarea.addEventListener('input', toggleClearButton);
+
+    // Инициализируем начальное состояние: если поле изначально пустое, крестик скрыт
+    toggleClearButton();
+  });
+</script>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const toggle = document.getElementById("ambientSoundToggle");
+  const icon = document.getElementById("ambientIcon");
+  const states = [
+    {
+      icon: "/static/icons/rain.svg",
+      sound: "/static/sound/noise-rain.mp3",
+      label: "Фоновый шум: дождь"
+    },
+    {
+      icon: "/static/icons/fire.svg",
+      sound: "/static/sound/noise-fire.mp3",
+      label: "Фоновый шум: огонь"
+    },
+    {
+      icon: "/static/icons/street.svg",
+      sound: "/static/sound/noise-street.mp3",
+      label: "Фоновый шум: улица"
+    },
+    {
+      icon: "/static/icons/close.svg",
+      sound: null,
+      label: "Фоновый шум выключен"
+    }
+  ];
+  let current = 0;
+  let audio = null;
+  toggle.addEventListener("click", () => {
+    if (audio) {
+      audio.pause();
+      audio.currentTime = 0;
+      audio = null;
+    }
+const state = states[current];
+current = (current + 1) % states.length;
+    icon.src = state.icon;
+    toggle.title = state.label;
+
+    if (state.sound) {
+      audio = new Audio(state.sound);
+      audio.loop = true;
+      audio.volume = 0.4;
+      audio.play().catch(() => {});
+    }
+  });
+});
+</script>
+<audio id="sharedAudio" preload="auto" crossorigin="anonymous"></audio>
+<script>
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+const globalGainNode = audioCtx.createGain();
+globalGainNode.connect(audioCtx.destination);
+globalGainNode.gain.value = 1;
+document.addEventListener("DOMContentLoaded", () => {
+  const sharedAudio = document.getElementById("sharedAudio");
+  let activePlayer = null;
+  const source = audioCtx.createMediaElementSource(sharedAudio);
+  source.connect(globalGainNode);
+  sharedAudio.addEventListener("play", () => {
+    if (audioCtx.state === "suspended") audioCtx.resume();
+  });
+  function formatTime(seconds) {
+    const m = Math.floor(seconds / 60).toString().padStart(2, '0');
+    const s = Math.floor(seconds % 60).toString().padStart(2, '0');
+    return `${m}:${s}`;
+  }
+  document.querySelectorAll(".custom-player").forEach(player => {
+    const btn = player.querySelector(".play-btn");
+    const bar = player.querySelector(".bar-fill");
+    const time = player.querySelector(".time");
+    const src = player.dataset?.src;
+    const barBg = player.querySelector(".bar-bg");
+    if (barBg) {
+      barBg.addEventListener("click", (e) => {
+        const rect = barBg.getBoundingClientRect();
+        const clickX = e.clientX - rect.left;
+        const percent = clickX / rect.width;
+        if (!isNaN(sharedAudio.duration)) {
+          sharedAudio.currentTime = sharedAudio.duration * percent;
+        }
+      });
+    }
+    if (!btn || !bar || !time || !src) return;
+    btn.addEventListener("click", () => {
+      if (activePlayer === player && !sharedAudio.paused) {
+        sharedAudio.pause();
+        btn.textContent = "▶";
+        return;
+      }
+      if (activePlayer === player && sharedAudio.paused) {
+        sharedAudio.play();
+        btn.textContent = "⏸";
+        return;
+      }
+      if (activePlayer) {
+        activePlayer.querySelector(".play-btn").textContent = "▶";
+        activePlayer.querySelector(".bar-fill").style.width = "0%";
+        activePlayer.querySelector(".time").textContent = "00:00";
+      }
+      activePlayer = player;
+      if (sharedAudio.src !== src) {
+        sharedAudio.pause();
+        sharedAudio.currentTime = 0;
+        sharedAudio.src = src;
+      }
+      sharedAudio.play();
+      btn.textContent = "⏸";
+    });
+  });
+  sharedAudio.addEventListener("timeupdate", () => {
+    if (!activePlayer || !sharedAudio.duration) return;
+    const percent = (sharedAudio.currentTime / sharedAudio.duration) * 100;
+    const bar = activePlayer.querySelector(".bar-fill");
+    const time = activePlayer.querySelector(".time");
+    bar.style.width = `${percent}%`;
+    time.textContent = formatTime(sharedAudio.currentTime);
+  });
+  sharedAudio.addEventListener("ended", () => {
+    if (!activePlayer) return;
+    activePlayer.querySelector(".play-btn").textContent = "▶";
+    activePlayer.querySelector(".bar-fill").style.width = "0%";
+    activePlayer.querySelector(".time").textContent = "00:00";
+    activePlayer = null;
+  });
+});
+</script>
+<!-- 🔒 Модальное окно подтверждения удаления -->
+<div id="confirmModal" class="modal-overlay" style="display: none;">
+  <div class="modal-content">
+    <p style="font-size:18px; margin:0 0 12px;">Очистить всю историю?</p>
+    <div class="modal-actions">
+      <button id="confirmYes" class="mic-btn">Да</button>
+      <button id="confirmNo"  class="mic-btn" style="background: #444;">Нет</button>
+    </div>
+  </div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const links = document.querySelectorAll('.footer-lux a');
+  links.forEach(link => {
+    const text = link.textContent.toLowerCase();
+    if (text.includes("privacy")) {
+      link.addEventListener('click', e => {
+        e.preventDefault();
+        document.getElementById("policyModal").style.display = "flex";
+      });
+    }
+    if (text.includes("terms")) {
+      link.addEventListener('click', e => {
+        e.preventDefault();
+        document.getElementById("termsModal").style.display = "flex";
+      });
+    }
+    if (text.includes("commercial")) {
+      link.addEventListener('click', e => {
+        e.preventDefault();
+        document.getElementById("commercialModal").style.display = "flex";
+      });
+    }
+    if (text.includes("faq")) {
+      link.addEventListener('click', e => {
+        e.preventDefault();
+        document.getElementById("faqModal").style.display = "flex";
+      });
+    }
+    if (text.includes("about")) {
+      link.addEventListener('click', e => {
+        e.preventDefault();
+        document.getElementById("aboutModal").style.display = "flex";
+      });
+    }
+    if (text.includes("pricing")) {
+      link.addEventListener('click', e => {
+        e.preventDefault();
+        document.getElementById("pricingModal").style.display = "flex";
+      });
+    }
+    if (text.includes("contact")) {
+      link.addEventListener('click', e => {
+        e.preventDefault();
+        document.getElementById("contactModal").style.display = "flex";
+      });
+    }
+    if (text.includes("tools")) {
+      link.addEventListener('click', e => {
+        e.preventDefault();
+        document.getElementById("toolsModal").style.display = "flex";
+      });
+    }
+  });
+});
+
+function closePolicy()     { document.getElementById("policyModal").style.display = "none"; }
+function closeTerms()      { document.getElementById("termsModal").style.display = "none"; }
+function closeCommercial() { document.getElementById("commercialModal").style.display = "none"; }
+function closeFAQ()        { document.getElementById("faqModal").style.display = "none"; }
+function closeAbout()      { document.getElementById("aboutModal").style.display = "none"; }
+function closePricing()    { document.getElementById("pricingModal").style.display = "none"; }
+function closeContact()    { document.getElementById("contactModal").style.display = "none"; }
+function closeTools()      { document.getElementById("toolsModal").style.display = "none"; }
+</script>
+
+<!-- Подключение основного скрипта с отложенной загрузкой -->
+<script src="{{ url_for('static', filename='scripts.js') }}" defer></script>
+{% include 'modals.html' %}
+<div id="tooltipHover"></div>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const container = document.querySelector('.custom-options');
+  if (!container) return;
+  const all = Array.from(container.querySelectorAll('.custom-option:not(.disabled-group)'));
+  const ru = all.filter(o => o.dataset.value.startsWith('ru'));
+  const en = all.filter(o => o.dataset.value.startsWith('en'));
+  container.innerHTML = '';
+  if (ru.length) {
+    const h1 = document.createElement('div');
+    h1.className = 'custom-option disabled-group';
+    h1.textContent = '🇷🇺 Русские голоса';
+    container.append(h1, ...ru);
+  }
+  if (en.length) {
+    const h2 = document.createElement('div');
+    h2.className = 'custom-option disabled-group';
+    h2.textContent = '🇺🇸 English voices';
+    container.append(h2, ...en);
+  }
+});
+</script>
+<script>
+function toggleFooterPanel() {
+  const panel = document.getElementById("mobileFooterPanel");
+  panel.style.display = panel.style.display === "none" ? "flex" : "none";
+}
+// Только ссылки .footer-link открывают модалки
+function openModalAndHideFooter(modalId) {
+  document.getElementById('mobileFooterPanel').style.display = 'none';
+
+  // Закрыть все модалки
+  const modals = document.querySelectorAll('.glass-modal');
+  modals.forEach(m => m.style.display = 'none');
+
+  // Открыть нужную
+  const target = document.getElementById(modalId);
+  if (target) target.style.display = 'flex';
+}
+// Защита: клики в пустом месте панели НЕ реагируют
+document.addEventListener("DOMContentLoaded", () => {
+  const panel = document.getElementById("mobileFooterPanel");
+  if (panel) {
+    panel.addEventListener("click", (e) => {
+      if (!e.target.closest("a")) {
+        e.stopPropagation();
+        e.preventDefault();
+      }
+    });
+  }
+});
+</script>
+<script>
+function toggleFooterPanel() {
+  const panel = document.getElementById("mobileFooterPanel");
+  panel.style.display = (panel.style.display === "flex") ? "none" : "flex";
+}
+function openModalAndHideFooter(event, modalId) {
+  event.preventDefault();
+  event.stopPropagation();
+
+  document.getElementById('mobileFooterPanel').style.display = 'none';
+  document.querySelectorAll('.glass-modal').forEach(m => m.style.display = 'none');
+  const target = document.getElementById(modalId);
+  if (target) target.style.display = 'flex';
+}
+// 👇 Жёсткий контроль: разрешаем только по span#footerToggle
+document.addEventListener("DOMContentLoaded", () => {
+  document.getElementById("footerToggle").addEventListener("click", (e) => {
+    e.stopPropagation();
+    toggleFooterPanel();
+  });
+  // Любой другой клик — не вызывает ничего
+  document.addEventListener("click", (e) => {
+    const panel = document.getElementById("mobileFooterPanel");
+    if (panel && panel.style.display === "flex") {
+      const isFooterButton = e.target.closest("#mobileFooterPanel a");
+      if (!isFooterButton) {
+        e.stopPropagation();
+        e.preventDefault();
+      }
+    }
+  });
+});
+</script>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll('.download-btn.download-mp3').forEach(link => {
+    link.addEventListener("click", (e) => {
+      e.preventDefault();
+      const filename = link.dataset.filename;
+      if (!filename) return;
+      const downloadUrl = `/download/${filename}`;
+      const a = document.createElement("a");
+      a.href = downloadUrl;
+      a.download = ""; // браузер сам получит имя из заголовка
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    });
+  });
+});
+</script>
+<footer class="footer-lux">
+  <div class="footer-line">
+<span class="copyright">© 2025 PRIZRAK TTS Studio. Все права защищены.</span>
+    <a href="#" data-modal="aboutModal">О проекте</a>
+    <a href="#" data-modal="pricingModal">Тарифы</a>
+    <a href="#" data-modal="commercialModal">Коммерция</a>
+    <a href="#" data-modal="policyModal">Политика</a>
+    <a href="#" data-modal="termsModal">Соглашение</a>
+    <a href="#" data-modal="faqModal">FAQ</a>
+    <a href="#" data-modal="contactModal">Контакты</a>
+    <a href="#" data-modal="toolsModal">Инструменты</a>
+    <span>v1.0</span>
+    <span>Сгенерировано: <b>698</b> <span style="color:#ff66cc;"> ♥ 1</span></span>
+  </div>
+</footer>
+</div>
+<script>
+  const vid = document.getElementById('video-bg');
+  vid.onerror = function() {
+    console.error('⛔ Ошибка загрузки видео-фона!');
+    vid.style.background = 'red';
+  };
+</script>
+<style>
+.tooltip-box {
+  position: absolute;
+  background: rgba(20, 20, 20, 0.95);
+  color: #fff;
+  font-size: 13px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 999999;
+  opacity: 0;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  transform: translateY(6px);
+  box-shadow: 0 0 8px rgba(0,0,0,0.3);
+}
+.tooltip-box.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+</style>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const tooltip = document.createElement("div");
+  tooltip.className = "tooltip-box";
+  document.body.appendChild(tooltip);
+
+  document.querySelectorAll("[data-tooltip]").forEach(el => {
+    el.addEventListener("mouseenter", e => {
+      tooltip.textContent = el.getAttribute("data-tooltip");
+      const rect = el.getBoundingClientRect();
+      tooltip.style.left = rect.left + window.scrollX + rect.width / 2 + "px";
+      tooltip.style.top = rect.top + window.scrollY - 10 + "px";
+      tooltip.style.transform = "translateX(-50%) translateY(-8px)";
+      tooltip.classList.add("show");
+    });
+    el.addEventListener("mouseleave", () => {
+      tooltip.classList.remove("show");
+    });
+  });
+});
+</script>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  function centerModals() {
+    document.querySelectorAll(".glass-modal").forEach(modal => {
+      const content = modal.querySelector(".glass-content");
+      if (!content) return;
+      const vh = window.innerHeight;
+      const ch = content.offsetHeight;
+      // Если контент меньше вьюпорта — центрируем по вертикали
+      if (ch < vh) {
+        content.style.marginTop = (vh - ch) / 2 + "px";
+      } else {
+        // Иначе — убираем отступ, пусть занимает верх
+        content.style.marginTop = "20px";
+      }
+    });
+  }
+  // При открытии модалки
+  document.querySelectorAll(".glass-modal").forEach(modal => {
+    modal.addEventListener("transitionend", centerModals);
+  });
+
+  // При ресайзе окна
+  window.addEventListener("resize", centerModals);
+});
+</script>
+<script>
+// Открытие модалок по data-modal
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll("[data-modal]").forEach(el => {
+    const targetId = el.dataset.modal;
+    el.addEventListener("click", e => {
+      e.preventDefault();
+      const modal = document.getElementById(targetId);
+      if (modal) modal.classList.add("active");
+    });
+  });
+});
+</script>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const modals = document.querySelectorAll(".glass-modal");
+  // Автоматическое открытие модалки по href="#modalId"
+  document.querySelectorAll('a[href^="#"]').forEach(link => {
+    const id = link.getAttribute("href").substring(1);
+    const modal = document.getElementById(id);
+    if (!modal || !modal.classList.contains("glass-modal")) return;
+    link.addEventListener("click", e => {
+      e.preventDefault();
+      modal.classList.add("active");
+      document.body.classList.add("modal-open");
+    });
+  });
+  // Закрытие по ✖
+  modals.forEach(modal => {
+    const close = modal.querySelector(".close-btn");
+    if (close) {
+      close.addEventListener("click", () => {
+        modal.classList.remove("active");
+        document.body.classList.remove("modal-open");
+      });
+    }
+    // Закрытие по клику вне
+    modal.addEventListener("click", e => {
+      if (e.target === modal) {
+        modal.classList.remove("active");
+        document.body.classList.remove("modal-open");
+      }
+    });
+  });
+
+  // Закрытие по Esc
+  document.addEventListener("keydown", e => {
+    if (e.key === "Escape") {
+      modals.forEach(m => m.classList.remove("active"));
+      document.body.classList.remove("modal-open");
+    }
+  });
+});
+</script>
+<header class="main-header">
+<div class="nav-left">
+  <div class="logo-wrapper">
+    <img src="{{ url_for('static', filename='icons/priz.svg') }}" alt="Prizrak AI" class="logo" style="height: 160px;">
+
+  </div>
+</div>
+
+<div class="nav-right">
+  {% if current_user.is_authenticated %}
+  <div class="auth-info">
+    <img src="{{ url_for('static', filename='icons/user.svg') }}" alt="User Icon" class="auth-icon" />
+    {{ current_user.name }} — {{ current_user.email }}
+    <a href="/logout" class="auth-btn ghost">Выйти</a>
+  </div>
+  {% else %}
+  <div class="auth-info guest">
+    <a href="/login" class="auth-btn ghost">Вход</a>
+    <a href="/login" class="auth-btn solid">Регистрация</a>
+  </div>
+  {% endif %}
+  <a href="/dashboard" class="btn-cabinet">Личный кабинет</a>
+</div>
+
+</header>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const el = document.getElementById("animatedAI");
+  let flipped = false;
+
+  setInterval(() => {
+    el.textContent = flipped ? "AI" : "IA";
+    flipped = !flipped;
+  }, 2600);
+});
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const modals = document.querySelectorAll('.glass-modal');
+  modals.forEach(modal => {
+    modal.addEventListener('transitionend', () => {
+      // На всякий случай
+      if (modal.style.display === 'none') {
+        document.body.classList.remove('no-scroll');
+      }
+    });
+  });
+
+  const observer = new MutationObserver(() => {
+    const anyOpen = Array.from(modals).some(m => m.style.display === 'block');
+    document.body.classList.toggle('no-scroll', anyOpen);
+  });
+
+  observer.observe(document.body, { attributes: true, childList: true, subtree: true });
+});
+</script>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  // Полная блокировка всех возможных скроллов
+  document.documentElement.style.overflow = 'hidden';
+  document.body.style.overflow = 'hidden';
+  document.body.style.position = 'fixed';
+  document.body.style.width = '100%';
+  document.body.style.top = '0';
+  document.body.style.left = '0';
+
+  // Принудительно ставим scrollTop = 0 каждые 50 мс
+  setInterval(() => {
+    window.scrollTo(0, 0);
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+  }, 50);
+
+  // Блокируем колёсико мыши, стрелки и тач
+  window.addEventListener("wheel", e => e.preventDefault(), { passive: false });
+  window.addEventListener("touchmove", e => e.preventDefault(), { passive: false });
+  window.addEventListener("keydown", e => {
+    const keys = ['ArrowUp', 'ArrowDown', 'Space', 'PageUp', 'PageDown'];
+    if (keys.includes(e.code)) e.preventDefault();
+  });
+});
+</script>
+<script>
+document.querySelector('form').addEventListener('submit', function() {
+  const btn = document.getElementById('generateBtn');
+  const spinner = document.getElementById('spinner');
+  const micIcon = document.getElementById('micIcon');
+  const btnText = document.getElementById('btnText');
+
+  spinner.style.display = 'inline-block';
+  micIcon.style.display = 'none';
+  btnText.textContent = 'Генерируется...';
+  btn.disabled = true;
+});
+</script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    ['.custom-options', '#history-list'].forEach(selector => {
+      const el = document.querySelector(selector);
+      if (el) {
+        el.addEventListener('wheel', e => e.stopPropagation(), { passive: true });
+      }
+    });
+  });
+</script>
+
+</body>
+</html>

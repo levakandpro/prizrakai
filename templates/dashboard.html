@@ -1,0 +1,175 @@
+<!-- Личный кабинет — финальный шаблон -->
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Личный кабинет — PRIZRAK</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-content">
+      <div class="header-left">
+        <h1 class="dashboard-title">Личный кабинет</h1>
+        <img src="/static/icons/dashboard-icon.svg" alt="Кабинет" class="dashboard-icon">
+      </div>
+      <a href="/" class="btn btn-home">🏠 На главную</a>
+    </div>
+  </header>
+
+  <div class="dashboard-container">
+    <section class="dashboard-card">
+      <h2 class="card-title">💼 Текущий тариф</h2>
+      <div class="tariff-info">
+        <p><strong>Название:</strong> {{ user.tariff_name }}</p>
+        <p><strong>Генераций в день:</strong> {{ user.daily_limit }}</p>
+        <p><strong>Срок действия:</strong> до {{ user.tariff_expires }}</p>
+        <p><strong>Осталось дней:</strong> {{ user.days_left }}</p>
+        <a href="/update_tariff" class="btn-tariff-upgrade">⚡ Обновить тариф</a>
+      </div>
+    </section>
+
+    <section class="dashboard-card">
+      <h2 class="card-title">📤 Отправка скрина оплаты</h2>
+      <form id="uploadForm" enctype="multipart/form-data">
+        <input type="text" name="name" placeholder="Комментарий / имя">
+        <input type="file" name="screenshot">
+        <button type="submit" class="btn-submit">Отправить</button>
+      </form>
+    </section>
+
+    <section class="dashboard-card">
+      <h2 class="card-title">📜 Платёжная история</h2>
+      <table class="history-table">
+        <thead>
+          <tr>
+            <th>Дата</th>
+            <th>Комментарий</th>
+            <th>Файл</th>
+            <th>Статус</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for p in payments %}
+          <tr>
+            <td>{{ p.date.split('T')[0] }}</td>
+            <td>{{ p.name }}</td>
+            <td><a href="/static/uploads/{{ p.filename }}" target="_blank">📎</a></td>
+            <td>{{ p.status }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </section>
+  </div>
+
+  <footer class="dashboard-footer">
+    <button class="footer-btn profile-btn" onclick="toggleProfileModal()">👤 Профиль</button>
+    <button class="footer-btn tariff-btn" onclick="toggleTariffModal()">💎 Мой тариф</button>
+    <form method="POST" action="/delete_account" onsubmit="return confirm('Вы точно хотите удалить аккаунт? Это необратимо.')" style="margin: 0;">
+      <button class="footer-btn danger-btn" type="submit">🗑 Удалить</button>
+    </form>
+  </footer>
+
+  <!-- Профиль -->
+  <div id="profileModal" class="glass-modal">
+    <div class="glass-profile-card">
+      <button class="close-btn" onclick="document.getElementById('profileModal').style.display='none'">✖</button>
+      <div class="avatar-row">
+<img src="{{ url_for('static', filename='icons/ava.png') }}" alt="avatar" class="profile-avatar">
+
+        <div class="user-info">
+          <h3>{{ user.name }}</h3>
+          <p>{{ user.email }}</p>
+          <p><strong>Дата регистрации:</strong> {{ user.registered_at }}</p>
+          <p><strong>ID:</strong> {{ user.id }}</p>
+        </div>
+      </div>
+      <form action="/logout" method="get">
+        <button class="footer-btn danger-btn" type="submit">🚪 Выйти</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Модалка тарифа -->
+<div id="tariffModal" class="glass-modal">
+  <div class="glass-profile-card">
+    <button class="close-btn" onclick="document.getElementById('tariffModal').classList.remove('active')">✖</button>
+    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 24px;">
+      <img src="/static/icons/diamond.svg" alt="иконка тарифа" style="width: 24px; height: 24px;">
+      <h3 style="margin: 0; font-size: 20px;">Выберите тариф</h3>
+    </div>
+
+    <div class="tariff-options">
+      <div class="tariff-card free">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <img src="/static/icons/free.svg" alt="free" style="width: 20px; height: 20px;">
+          <h4 style="margin: 0;">FREE / БЕСПЛАТНЫЙ</h4>
+        </div>
+        <ul>
+          <li>10 генераций в день</li>
+          <li>До 5000 символов на генерацию</li>
+          <li>0 $ / навсегда</li>
+        </ul>
+      </div>
+
+      <div class="tariff-card premium">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <img src="/static/icons/high-quality.svg" alt="premium" style="width: 20px; height: 20px;">
+          <h4 style="margin: 0;">PRIZRAK PREMIUM</h4>
+        </div>
+        <ul>
+          <li>БЕЗЛИМИТНАЯ генерация</li>
+          <li>Мгновенный приоритет</li>
+          <li>$35 / месяц</li>
+        </ul>
+<a href="/update_tariff" class="btn-tariff-upgrade">
+  <img src="/static/icons/award.svg" alt="обновить" style="width: 16px; height: 16px; vertical-align: middle; margin-right: 6px;">
+  Обновить до <span class="premium-gold">PREMIUM</span>
+</a>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<script>
+  function toggleProfileModal() {
+    document.getElementById("profileModal").classList.add("active");
+  }
+
+  function toggleTariffModal() {
+    document.getElementById("tariffModal").classList.add("active");
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    const uploadForm = document.getElementById("uploadForm");
+    if (uploadForm) {
+      uploadForm.onsubmit = async (e) => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        const res = await fetch("/submit_payment", {
+          method: "POST",
+          body: formData
+        });
+        const json = await res.json();
+        alert(json.success ? "Скрин успешно отправлен" : "Ошибка: " + json.message);
+      };
+    }
+
+    // Кнопки закрытия
+    document.querySelectorAll(".close-btn").forEach(btn => {
+      btn.onclick = () => {
+        document.getElementById("profileModal").classList.remove("active");
+        document.getElementById("tariffModal").classList.remove("active");
+      };
+    });
+  });
+</script>
+
+
+</body>
+</html>

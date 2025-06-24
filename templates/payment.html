@@ -1,0 +1,1260 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Оплата PREMIUM тарифа PRIZRAK AI</title>
+<link rel="icon" type="image/png" href="/static/icons/money-dollar-coin.svg">
+<link rel="stylesheet" href="/static/style.css?v=2.5">
+  <style>
+    * { box-sizing: border-box; }
+body, html {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  font-family: 'Inter', sans-serif;
+  background: #f4f5f7;
+  color: #1a1a1a;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.wrapper {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr); /* 6 карточек в ряд */
+  gap: 20px;
+  padding: 20px;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.payment-block {
+  background: #fff;
+  padding: 20px;
+  border-radius: 16px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06);
+  display: flex;
+  flex-direction: column;
+  min-width: 180px;
+}
+
+
+.payment-block h3 {
+  margin: 0 0 10px;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.payment-block p {
+  margin: 6px 0;
+  font-size: 14px;
+  color: #555;
+}
+
+.payment-block img {
+  max-width: 100%;
+  display: block;
+  margin: 12px 0;
+  border-radius: 8px;
+}
+
+input, .file-btn, button.upload {
+  width: 100%;
+  font-size: 14px;
+  border-radius: 10px;
+  margin: 10px 0;
+}
+
+input[type="email"], input[type="file"] {
+  padding: 12px 14px;
+  border: 1px solid #ccc;
+  background: #f8f8f8;
+  color: #111;
+}
+
+input[type="email"]:focus {
+  border-color: #7b4cff;
+  background: #fff;
+  outline: none;
+}
+
+.file-btn {
+  padding: 11px;
+  background: #f4f4f4;
+  color: #111;
+  border: 1px solid #ccc;
+  cursor: pointer;
+  transition: 0.25s;
+}
+
+.file-btn:hover {
+  border-color: #7b4cff;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(123, 76, 255, 0.08);
+}
+
+.file-name {
+  font-size: 13px;
+  color: #666;
+  text-align: center;
+  margin-bottom: 12px;
+}
+
+button.upload {
+  padding: 13px;
+  font-size: 15px;
+  background: linear-gradient(135deg, #7b4cff, #a084ff);
+  color: #fff;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.25s;
+}
+
+button.upload:hover {
+  box-shadow: 0 4px 12px rgba(123, 76, 255, 0.3);
+  transform: translateY(-1px);
+}
+
+button.upload:active {
+  transform: scale(0.98);
+}
+
+.uploadStatus {
+  font-size: 13px;
+  text-align: center;
+  margin-top: 8px;
+  color: #888;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.uploadStatus.success {
+  background: #e6f9ec;
+  color: #1e6b3d;
+  border: 1px solid #b6e2c2;
+  padding: 12px 16px;
+  border-radius: 10px;
+  font-weight: 500;
+  opacity: 1;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+}
+
+.uploadStatus.success::before {
+  content: "✅ ";
+  font-weight: bold;
+}
+
+.uploadStatus.success.hide {
+  opacity: 0;
+  transform: scale(0.95);
+  transition: all 0.3s ease;
+}
+
+.upload-form.drag-over {
+  border: 2px dashed #7b4cff;
+  background: #f7f3ff;
+  position: relative;
+}
+
+.upload-form.drag-over::before {
+  content: "Отпустите файл здесь";
+  position: absolute;
+  top: 40%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 16px;
+  color: #666;
+  background: #fff;
+  padding: 6px 12px;
+  border-radius: 6px;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.upload.loading .upload::after {
+  content: "";
+  margin-left: 8px;
+  width: 14px;
+  height: 14px;
+  border: 2px solid #999;
+  border-top-color: transparent;
+  border-radius: 50%;
+  display: inline-block;
+  animation: spin 0.8s linear infinite;
+  vertical-align: middle;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.preview-image {
+  max-width: 100%;
+  max-height: 180px;
+  margin-top: 10px;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+  display: block;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.preview-image.loaded {
+  opacity: 1;
+}
+
+.support, .support-footer {
+  text-align: center;
+  font-size: 14px;
+  color: #444;
+}
+
+.support a, .support-footer a {
+  margin: 0 10px;
+  text-decoration: none;
+  color: #1a1a1a;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.support img, .support-footer img {
+  width: 18px;
+}
+
+footer {
+  text-align: center;
+  font-size: 13px;
+  color: #777;
+  padding: 40px 20px;
+  margin-top: 60px;
+}
+
+.page-title {
+  text-align: center;
+  font-size: 36px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin: 40px 0 20px;
+  color: #1a1a1a;
+  text-shadow: 0 1px 0 rgba(0,0,0,0.05);
+}
+
+.page-title span {
+  background: linear-gradient(to right, #c59d5f, #e0c187, #f3e3b1);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: 900;
+  letter-spacing: 1.2px;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+.payment-note {
+  background: #fff8e1;
+  color: #3b2f0c;
+  padding: 18px 22px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+  font-size: 13.5px;
+  line-height: 1.65;
+  max-width: 900px;
+  margin: 32px auto;
+  border: 1px solid #f0e2b6;
+}
+
+.payment-note strong {
+  color: #1a1a1a;
+  font-weight: 600;
+}
+
+.exchange-note {
+  background: #f0f7ff;
+  color: #0d2b4d;
+  padding: 14px 20px;
+  border-radius: 10px;
+  margin: 0 auto 30px;
+  font-size: 14px;
+  max-width: 800px;
+  text-align: center;
+  border: 1px solid #cbe2ff;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+}
+
+.exchange-note strong {
+  font-weight: 600;
+  color: #0d1f36;
+}
+
+.currency-line {
+  margin-left: 6px;
+  font-weight: 500;
+  color: #004e89;
+}
+
+.horizontal-divider {
+  margin: 60px auto;
+  border: none;
+  border-top: 1px solid #ddd;
+  max-width: 800px;
+}
+.payment-warning {
+  position: relative;
+  background: #fff2c2;
+  color: #5c4400;
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  text-align: center;
+  border: 1px solid #f0e2b6;
+  border-radius: 8px;
+  max-width: 1000px;
+  margin: 20px auto 10px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.payment-warning:hover {
+  border-bottom-left-radius: 8px;
+  border-bottom-right-radius: 8px;
+  box-shadow: none;
+}
+
+.payment-warning .hover-text {
+  text-decoration: underline dotted;
+}
+
+.payment-warning .warning-detail {
+  display: none;
+  text-align: left;
+  font-weight: 400;
+  font-size: 13.5px;
+  line-height: 1.6;
+  margin-top: 12px;
+  padding-top: 0;
+}
+
+.payment-warning:hover .warning-detail {
+  display: block;
+}
+
+.payment-warning ul {
+  margin: 8px 0 8px 18px;
+  padding: 0;
+}
+
+.payment-warning ul li {
+  list-style-type: disc;
+  margin: 4px 0;
+}
+.inline-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.title-with-faq {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.page-title {
+  margin: 0;
+  font-size: 36px;
+}
+
+.faq-wrapper {
+  display: flex;
+  align-items: center;
+}
+
+.faq-button {
+  font-size: 14px;
+  font-weight: 600;
+  color: #444;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0;
+}
+
+.faq-button:hover {
+  opacity: 0.75;
+}
+
+.faq-icon-large {
+  width: 34px;
+  height: 34px;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.faq-labels {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1;
+}
+
+.faq-text {
+  font-size: 18px;
+  font-weight: 600;
+  color: #444;
+}
+
+.faq-subtext {
+  font-size: 7px;
+  color: #ff0909;
+  font-weight: 500;
+  margin-top: 2px;
+  letter-spacing: 0.3px;
+}
+.faq-hover-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.faq-hover-box.visible {
+  display: block;
+}
+.faq-hover-box h3 {
+  font-size: 16px;
+  margin-top: 0;
+}
+
+.faq-hover-wrapper:hover .faq-hover-box {
+  display: block;
+}
+.faq-click-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.faq-hover-box {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 880px; /* ← шире */
+  max-width: 96vw;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+  padding: 24px 28px;
+  z-index: 9999;
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: #222;
+  margin-top: 10px;
+  text-align: left;
+  max-height: 80vh;         /* ограничим высоту */
+  overflow-y: auto;         /* скролл внутри */
+}
+
+.faq-hover-box::-webkit-scrollbar {
+  width: 6px;
+}
+.faq-hover-box::-webkit-scrollbar-thumb {
+  background-color: #ccc;
+  border-radius: 4px;
+}
+
+.faq-hover-box.active {
+  display: block;
+}
+.qr-code {
+  cursor: pointer;
+}
+
+.qr-modal {
+  display: none;
+  position: fixed;
+  z-index: 10000;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.8);
+  justify-content: center;
+  align-items: center;
+}
+.qr-modal-content {
+  max-width: 90%;
+  max-height: 90%;
+  border-radius: 8px;
+}
+.qr-close {
+  position: absolute;
+  top: 20px; right: 30px;
+  font-size: 40px;
+  color: #fff;
+  cursor: pointer;
+}
+.payment-block.disabled {
+  opacity: 0.5;
+  pointer-events: none;
+  position: relative;
+}
+.payment-block.disabled::after {
+  content: "⏳ Заявка отправлена";
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: #fff7d6;
+  color: #5c4400;
+  border: 1px solid #ecdba2;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  z-index: 10;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+}
+
+.reset-btn {
+  background: #eee;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 10px;
+  font-size: 13px;
+  color: #333;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.reset-btn:hover {
+  background: #ddd;
+}
+.payment-block.disabled .reset-btn {
+  pointer-events: auto;
+  opacity: 1;
+}
+.reset-btn {
+  position: relative;
+  z-index: 1;
+}
+.payment-block.disabled::after {
+  z-index: 0; /* ← Плашка уходит под кнопку */
+}
+.reset-all-btn {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 9999;
+  background: #fff8d7;
+  border: 1px solid #e8d78f;
+  border-radius: 12px;
+  width: 42px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  overflow: visible;
+}
+
+.reset-all-btn::before {
+  content: "Сбросить все заявки";
+  position: absolute;
+  right: 110%;
+  top: 50%;
+  transform: translateY(-50%);
+  background: #1a1a1a;
+  color: #fff;
+  font-size: 13px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+  z-index: 9999;
+}
+
+.reset-all-btn:hover::before {
+  opacity: 1;
+}
+
+.reset-icon {
+  width: 18px;
+  height: 18px;
+  display: block;
+  z-index: 1;
+}
+
+  </style> 
+</head>
+<body>
+<div class="title-with-faq">
+  <h1 class="page-title">
+    ОПЛАТА <span>PRIZRAK PREMIUM</span>
+  </h1>
+
+  <div class="faq-click-wrapper">
+    <div class="faq-wrapper">
+      <button id="faqBtn" class="faq-button">
+        <img src="/static/icons/faq.png" alt="FAQ" class="faq-icon-large">
+        <div class="faq-labels">
+          <span class="faq-text">FAQ</span>
+          <span class="faq-subtext">ПРОЧТИ!</span>
+        </div>
+      </button>
+    </div>
+
+    <div id="faqHoverBox" class="faq-hover-box">
+      <div class="faq-inner">
+        
+    <h3>❓ Часто задаваемые вопросы о тарифе PREMIUM</h3>
+
+    <p><strong>🔥 Что даёт тариф PREMIUM?</strong><br>
+    • Безлимитный доступ к голосовым генерациям.<br>
+    • Работает 24/7, без ограничений.<br>
+    • Поддержка всех языков.<br>
+    • До 5000 символов за раз.<br>
+    • Генерация без ожидания.<br>
+    💡 Бесплатный тариф — только 10 генераций в сутки.</p>
+
+    <p><strong>💳 Сколько стоит и в каких валютах?</strong><br>
+    • 370 сомони<br>
+    • или 35 USD<br>
+    • или 2800 RUB<br>
+    ⚠️ Сумма должна быть точной (напр. 34.99 USD — не активирует тариф).</p>
+
+    <p><strong>🧾 Как оплатить?</strong><br>
+    1. Выберите платёжную систему<br>
+    2. Переведите точную сумму<br>
+    3. Сделайте скриншот чека<br>
+    4. Укажите email<br>
+    5. Прикрепите скрин<br>
+    6. Отправьте заявку<br>
+    7. Дождитесь до 10 минут</p>
+
+    <p><strong>🌐 Какие платёжные системы поддерживаются?</strong><br>
+    Душанбе Сити, СпитаменПей, Васл, Эсхата, Амонатбанк, Сбербанк, ЮMoney<br>
+    🇷🇺 Из России — переводы на карту РФ, напишите нам за реквизитами.</p>
+
+    <p><strong>⏱ Сколько ждать активации?</strong><br>
+    Обычно до 10 минут после поступления средств.</p>
+
+    <p><strong>🧠 Что важно знать перед оплатой?</strong><br>
+    • Указывайте email, на который подключать тариф<br>
+    • Подключается по email из чека<br>
+    • Редактированные скрины удаляются — возврата нет<br>
+    • При недоплате обязательно напишите в Telegram/WhatsApp<br>
+    • Без уведомления доплата может не пройти</p>
+
+    <p><strong>🤝 Поддержка:</strong><br>
+    Напишите, если не нашли нужную систему. Ответим за 5 минут.<br>
+    📲 WhatsApp: +992 10 10 7777 3<br>
+    💬 Telegram: @levakand_pro</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="payment-warning">
+  ⚠️ <span class="hover-text">ВАЖНО! Перед оплатой обязательно прочтите</span>
+  <div class="warning-detail">
+    <p><strong>Для активации тарифа PREMIUM</strong> сумма оплаты должна быть <strong>точно</strong>:</p>
+    <ul>
+      <li>370 сомони</li>
+      <li>или 35 USD</li>
+      <li>или 2800 RUB</li>
+    </ul>
+    <p>Все QR-коды — это <strong>онлайн-кошельки</strong>, доступные через мобильные банки и платёжные системы.</p>
+    <p>Переводы на меньшую сумму <strong>не засчитываются</strong>, и тариф <strong>не активируется</strong>.</p>
+    <p><strong>Возврат средств невозможен</strong>, включая ошибки, неверные суммы или email.</p>
+    <p>После проверки вы увидите <strong>«Тариф PREMIUM активирован»</strong> в личном кабинете — обычно <strong>до 10 минут</strong>.</p>
+    <p><strong>Не нашли свою систему?</strong> Напишите нам в WhatsApp или Telegram — вышлем реквизиты, вы оплатите, отправите чек, и мы подключим тариф <strong>в течение 5 минут</strong>.</p>
+  </div>
+</div>
+
+
+
+<a href="{{ url_for('dashboard') }}" class="btn-back" style="margin: 20px; display: inline-block; text-decoration: none; font-size: 14px;">← Назад в кабинет</a>
+
+<div class="wrapper">
+<div class="payment-block">
+  <h3>
+    <img src="/static/icons/dc.png" alt="Душанбе Сити" style="width:24px; height:24px; vertical-align:sub; margin-right:6px;">
+    Душанбе Сити
+  </h3>
+  <p>По номеру: +992 888 55 38 52</p>
+  <img
+    src="/static/qr/qr_dushanbe_clean.png"
+    alt="QR Душанбе"
+    loading="lazy"
+    class="qr-code"
+    style="width:100%; border-radius:12px; margin:12px 0;"
+  >
+  <form class="upload-form" method="POST" enctype="multipart/form-data" action="/submit_payment">
+    <input type="hidden" name="source" value="Душанбе Сити">
+    <input type="email" name="name" placeholder="Ваш email" required class="form-email">
+    <input type="file" name="screenshot" accept="image/*" required style="display:none;">
+    <button type="button" class="file-btn">📤 Прикрепить скриншот</button>
+    <div class="file-name" style="display: none; color:#cc0000; font-size:13px;">❌ Пожалуйста, прикрепите скриншот</div>
+      <input type="text" name="nickname" style="display:none;">
+    <button type="submit" class="upload">🚀 Отправить заявку</button>
+    <div class="uploadStatus"></div>
+    <button type="button" class="reset-btn" style="display:none; margin-top:10px;">
+  🔁 Сбросить заявку
+</button>
+
+  </form>
+  <hr class="payment-divider">
+</div>
+
+<div class="payment-block">
+  <h3>
+    <img src="/static/icons/spitamen.png" alt="СпитаменПей" style="width:24px; height:24px; vertical-align:sub; margin-right:6px;">
+    СпитаменПей
+  </h3>
+  <p>По номеру: +992 888 55 38 52</p>
+  <p>Карта: 4607 6888 1525 9693</p>
+  <img
+    src="/static/qr/qr_spitamen.jpg"
+    alt="QR СпитаменПей"
+    loading="lazy"
+    class="qr-code"
+    style="width:100%; border-radius:12px; margin:12px 0;"
+  >
+  <form class="upload-form" method="POST" enctype="multipart/form-data" action="/submit_payment">
+    <input type="hidden" name="source" value="СпитаменПей">
+    <input type="email" name="name" placeholder="Ваш email" required class="form-email">
+    <input type="file" name="screenshot" accept="image/*" required style="display:none;">
+    <button type="button" class="file-btn">📤 Прикрепить скриншот</button>
+    <div class="file-name" style="display: none; color:#cc0000; font-size:13px;">❌ Пожалуйста, прикрепите скриншот</div>
+      <input type="text" name="nickname" style="display:none;">
+    <button type="submit" class="upload">🚀 Отправить заявку</button>
+    <div class="uploadStatus"></div>
+  </form>
+  <hr class="payment-divider">
+</div>
+
+<div class="payment-block">
+  <h3>
+    <img src="/static/icons/vasl.png" alt="Васл" style="width:24px; height:24px; vertical-align:sub; margin-right:6px;">
+    Васл
+  </h3>
+  <p>По номеру: +992 888 55 38 52</p>
+  <img
+    src="/static/qr/qr_vasl.jpg"
+    alt="QR Васл"
+    loading="lazy"
+    class="qr-code"
+    style="width:100%; border-radius:12px; margin:12px 0;"
+  >
+  <form class="upload-form" method="POST" enctype="multipart/form-data" action="/submit_payment">
+    <input type="hidden" name="source" value="Васл">
+    <input type="email" name="name" placeholder="Ваш email" required class="form-email">
+    <input type="file" name="screenshot" accept="image/*" required style="display:none;">
+    <button type="button" class="file-btn">📤 Прикрепить скриншот</button>
+    <div class="file-name" style="display: none; color:#cc0000; font-size:13px;">❌ Пожалуйста, прикрепите скриншот</div>
+      <input type="text" name="nickname" style="display:none;">
+    <button type="submit" class="upload">🚀 Отправить заявку</button>
+    <div class="uploadStatus"></div>
+  </form>
+  <hr class="payment-divider">
+</div>
+
+<div class="payment-block">
+  <h3>
+    <img src="/static/icons/amon.png" alt="Амонатбанк" style="width:20px; height:20px; vertical-align:middle; margin-right:6px;">
+    Амонатбанк
+  </h3>
+  <p>Счёт: 70000972400001300928</p>
+  <img
+    src="/static/qr/amonat.jpg"
+    alt="QR Амонатбанк"
+    loading="lazy"
+    class="qr-code"
+    style="width:100%; border-radius:12px; margin:12px 0;"
+  >
+  <form class="upload-form" method="POST" enctype="multipart/form-data" action="/submit_payment">
+    <input type="hidden" name="source" value="Амонатбанк">
+    <input type="email" name="name" placeholder="Ваш email" required class="form-email">
+    <input type="file" name="screenshot" accept="image/*" required style="display:none;">
+    <button type="button" class="file-btn">📤 Прикрепить скриншот</button>
+    <div class="file-name" style="display: none; color:#cc0000; font-size:13px;">❌ Пожалуйста, прикрепите скриншот</div>
+      <input type="text" name="nickname" style="display:none;">
+    <button type="submit" class="upload">🚀 Отправить заявку</button>
+    <div class="uploadStatus"></div>
+  </form>
+  <hr class="payment-divider">
+</div>
+
+<div class="payment-block">
+  <h3>
+    <img src="/static/icons/eshata.png" alt="Эсхата" style="width:24px; height:24px; vertical-align:sub; margin-right:6px;">
+    Эсхата
+  </h3>
+  <p>По номеру: +992 888 55 38 52</p>
+  <img
+    src="/static/qr/exhata.jpg"
+    alt="QR Эсхата"
+    loading="lazy"
+    class="qr-code"
+    style="width:100%; border-radius:12px; margin:12px 0;"
+  >
+  <form class="upload-form" method="POST" enctype="multipart/form-data" action="/submit_payment">
+    <input type="hidden" name="source" value="Эсхата">
+    <input type="email" name="name" placeholder="Ваш email" required class="form-email">
+    <input type="file" name="screenshot" accept="image/*" required style="display:none;">
+    <button type="button" class="file-btn">📤 Прикрепить скриншот</button>
+    <div class="file-name" style="display: none; color:#cc0000; font-size:13px;">❌ Пожалуйста, прикрепите скриншот</div>
+      <input type="text" name="nickname" style="display:none;">
+    <button type="submit" class="upload">🚀 Отправить заявку</button>
+    <div class="uploadStatus"></div>
+  </form>
+  <hr class="payment-divider">
+</div>
+
+<div class="payment-block">
+  <h3>
+    <img src="/static/icons/sber_ico.png" alt="Сбербанк" style="width:20px; height:20px; vertical-align:middle; margin-right:6px;">
+    Сбербанк
+  </h3>
+  <p>По номеру: +7 915 440-69-75</p>
+  <img
+    src="/static/qr/qr_sber_dushanbe_style.png"
+    alt="QR Сбербанк"
+    loading="lazy"
+    class="qr-code"
+    style="width:100%; border-radius:12px; margin:12px 0;"
+  >
+  <form class="upload-form" method="POST" enctype="multipart/form-data" action="/submit_payment">
+    <input type="hidden" name="source" value="Сбербанк">
+    <input type="email" name="name" placeholder="Ваш email" required class="form-email">
+    <input type="file" name="screenshot" accept="image/*" required style="display:none;">
+    <button type="button" class="file-btn">📤 Прикрепить скриншот</button>
+    <div class="file-name" style="display: none; color:#cc0000; font-size:13px;">❌ Пожалуйста, прикрепите скриншот</div>
+      <input type="text" name="nickname" style="display:none;">
+    <button type="submit" class="upload">🚀 Отправить заявку</button>
+    <div class="uploadStatus"></div>
+  </form>
+  <hr class="payment-divider">
+</div>
+
+<div class="payment-block">
+  <h3>
+    <img src="/static/icons/youmani.png" alt="ЮMoney" style="width:24px; height:24px; vertical-align:sub; margin-right:6px;">
+    ЮMoney
+  </h3>
+  <p>Счёт: 4100119012867909</p>
+  <img
+    src="/static/icons/youmani.png"
+    alt="Логотип ЮMoney"
+    loading="lazy"
+    class="qr-code"
+    style="width:120px; margin:12px auto; display:block;"
+  >
+  <form class="upload-form" method="POST" enctype="multipart/form-data" action="/submit_payment">
+    <input type="hidden" name="source" value="ЮMoney">
+    <input type="email" name="name" placeholder="Ваш email" required class="form-email">
+    <input type="file" name="screenshot" accept="image/*" required style="display:none;">
+    <button type="button" class="file-btn">📤 Прикрепить скриншот</button>
+    <div class="file-name" style="display: none; color:#cc0000; font-size:13px;">❌ Пожалуйста, прикрепите скриншот</div>
+      <input type="text" name="nickname" style="display:none;">
+    <button type="submit" class="upload">🚀 Отправить заявку</button>
+    <div class="uploadStatus"></div>
+  </form>
+  <hr class="payment-divider">
+</div>
+
+
+
+  <hr class="payment-divider">
+</div>
+  </div> <!-- .main-content -->
+</div> <!-- .wrapper -->
+<div class="exchange-note">
+  💰 <strong>Сумма к оплате:</strong> 
+  <span class="currency-line">370 сомони ≈ 35 USD ≈ 2800 RUB</span>
+</div>
+
+<!-- ГОРИЗОНТАЛЬНАЯ ЛИНИЯ НА ВСЮ ШИРИНУ -->
+<div style="width: 100vw; height: 1px; background-color: #bbb;"></div>
+<!-- БЛОК ПОДДЕРЖКИ -->
+<div class="support" style="text-align: center; font-size: 14px; color: #444; margin: 24px 0 12px;">
+  <p style="margin: 0 0 6px;">
+    Есть вопросы по оплате?
+    <span style="color:#555;">Напишите — ответим в течение <b>5 минут</b>.</span>
+  </p>
+  <a href="https://wa.me/992888553852?text=Здравствуйте,%20хочу%20подключить%20тариф%20PREMIUM"
+     target="_blank"
+     style="margin: 0 10px; text-decoration: none; color: #1a1a1a; display: inline-flex; align-items: center; gap: 6px;">
+    <img src="/static/icons/whatsapp.png" alt="WhatsApp" style="width: 18px;"> WhatsApp
+  </a>
+  <a href="https://t.me/levakand_pro"
+     target="_blank"
+     style="margin: 0 10px; text-decoration: none; color: #1a1a1a; display: inline-flex; align-items: center; gap: 6px;">
+    <img src="/static/icons/telegram.png" alt="Telegram" style="width: 18px;"> Telegram
+  </a>
+</div>
+
+<hr style="width: 100%; height: 1px; background: #ccc; margin: 20px 0 10px;">
+
+<!-- ВТОРАЯ ЛИНИЯ НА ВСЮ ШИРИНУ -->
+<div style="width: 100vw; height: 1px; background-color: #bbb;"></div>
+<script>
+document.querySelectorAll('.upload-form').forEach(form => {
+  const fileInput = form.querySelector('input[type="file"]');
+  const fileBtn = form.querySelector('.file-btn');
+  const fileName = form.querySelector('.file-name');
+  const status = form.querySelector('.uploadStatus');
+  const submitBtn = form.querySelector('.upload');
+
+  submitBtn.disabled = true;
+
+  fileBtn.addEventListener('click', () => fileInput.click());
+
+fileInput.addEventListener('change', () => {
+  if (form.closest('.payment-block')?.classList.contains('disabled')) return;
+
+  const file = fileInput.files[0];
+
+  const oldPreview = form.querySelector('.preview-image');
+  if (oldPreview) oldPreview.remove();
+
+  if (file && file.type.startsWith("image/")) {
+    submitBtn.disabled = false;
+    fileName.style.display = "none";
+
+    const img = document.createElement('img');
+    img.className = 'preview-image';
+    img.onload = () => img.classList.add('loaded');
+    img.src = URL.createObjectURL(file);
+    fileName.after(img);
+  } else {
+    submitBtn.disabled = true;
+    fileName.textContent = '❌ Пожалуйста, прикрепите скриншот';
+    fileName.style.display = "block";
+  }
+});
+
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  if (form.classList.contains('locked')) return;
+  form.classList.add('locked');
+
+  if (!fileInput.files[0]) {
+    status.textContent = '❌ Пожалуйста, выберите файл';
+    fileName.textContent = '❌ Пожалуйста, прикрепите скриншот';
+    fileName.style.display = "block";
+    form.classList.remove('locked');
+    return;
+  }
+
+  if (!fileInput.files[0].type.startsWith('image/')) {
+    status.textContent = '❌ Только изображения (JPG, PNG...)';
+    form.classList.remove('locked');
+    return;
+  }
+
+  if (fileInput.files[0].size > 5 * 1024 * 1024) {
+    status.textContent = '❌ Файл слишком большой (макс. 5MB)';
+    form.classList.remove('locked');
+    return;
+  }
+
+  const formData = new FormData(form);
+  submitBtn.disabled = true;
+  submitBtn.classList.add('loading');
+  status.textContent = '⏳ Отправка...';
+  status.classList.remove('success');
+
+  try {
+    const res = await fetch('/submit_payment', {
+      method: 'POST',
+      body: formData
+    });
+
+    const json = await res.json();
+
+    if (json.success) {
+      const source = form.querySelector('input[name="source"]').value;
+      localStorage.setItem(`payment_sent_${source}`, '1');
+
+      status.classList.add('success');
+      status.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+      const block = form.closest('.payment-block');
+      if (block) block.classList.add('disabled');
+
+      // Сброс формы и кнопки
+      form.reset();
+      const preview = form.querySelector('.preview-image');
+      if (preview) preview.remove();
+      fileName.style.display = "none";
+
+      // Показ таймера
+      let remaining = 15;
+      status.textContent = `⏳ Подождите ${remaining} сек...`;
+      submitBtn.textContent = `⏳ ${remaining} сек`;
+      submitBtn.disabled = true;
+
+      const interval = setInterval(() => {
+        remaining--;
+        if (remaining <= 0) {
+          clearInterval(interval);
+          status.classList.add('hide');
+          setTimeout(() => {
+            status.textContent = '';
+            status.classList.remove('success', 'hide');
+          }, 300);
+        } else {
+          status.textContent = `⏳ Подождите ${remaining} сек...`;
+          submitBtn.textContent = `⏳ ${remaining} сек`;
+        }
+      }, 1000);
+
+    } else {
+      status.textContent = '❌ Ошибка: ' + (json.message || 'Не удалось отправить');
+      status.classList.remove('success');
+      submitBtn.disabled = false;
+      submitBtn.textContent = '🚀 Отправить заявку';
+      submitBtn.classList.remove('loading');
+      form.classList.remove('locked');
+    }
+
+  } catch (err) {
+    status.textContent = '❌ Ошибка при отправке';
+    status.classList.remove('success');
+    submitBtn.disabled = false;
+    submitBtn.textContent = '🚀 Отправить заявку';
+    submitBtn.classList.remove('loading');
+    form.classList.remove('locked');
+    console.error(err);
+  }
+});
+
+
+
+  // DRAG & DROP
+  form.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    form.classList.add('drag-over');
+  });
+
+  form.addEventListener('dragleave', () => {
+    form.classList.remove('drag-over');
+  });
+
+  form.addEventListener('drop', (e) => {
+    e.preventDefault();
+    form.classList.remove('drag-over');
+
+    const file = e.dataTransfer.files?.[0];
+    if (!file || !file.type.startsWith('image/')) {
+      status.textContent = '❌ Только изображения (JPG, PNG...)';
+      return;
+    }
+
+    const dt = new DataTransfer();
+    dt.items.add(file);
+    fileInput.files = dt.files;
+
+    fileName.textContent = file.name;
+    submitBtn.disabled = false;
+
+    const oldPreview = form.querySelector('.preview-image');
+    if (oldPreview) oldPreview.remove();
+
+    const img = document.createElement('img');
+    img.className = 'preview-image';
+    img.src = URL.createObjectURL(file);
+    img.onload = () => img.classList.add('loaded');
+    fileName.after(img);
+  });
+});
+</script>
+
+
+
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const emailInput = document.querySelector('input[name="name"]');
+  if (!emailInput) return;
+
+  // Вставить сохранённый email, если есть
+  const saved = localStorage.getItem("payment_email");
+  if (saved) emailInput.value = saved;
+
+  // Сохранять при изменении
+  emailInput.addEventListener("input", () => {
+    localStorage.setItem("payment_email", emailInput.value.trim());
+  });
+});
+
+window.addEventListener('load', () => {
+  const loader = document.getElementById('loader');
+  if (loader) loader.remove();
+});
+
+</script>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const emailInputs = document.querySelectorAll('input[name="name"]');
+  const savedEmail = localStorage.getItem("payment_email");
+
+  if (savedEmail) {
+    emailInputs.forEach(input => input.value = savedEmail);
+  }
+
+  emailInputs.forEach(input => {
+    input.addEventListener("input", () => {
+      localStorage.setItem("payment_email", input.value.trim());
+    });
+  });
+});
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('input[type="email"]').forEach(input => {
+    const saved = localStorage.getItem('userEmail');
+    if (saved) input.value = saved;
+
+    input.addEventListener('input', () => {
+      localStorage.setItem('userEmail', input.value.trim());
+    });
+  });
+});
+</script>
+<div id="loader" style="
+  position:fixed;
+  top:0; left:0;
+  width:100%; height:100%;
+  background:#fff;
+  z-index:9999;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  flex-direction:column;
+">
+  <img src="/static/icons/loader.svg" alt="Loading" style="width:64px; height:64px; margin-bottom:16px;">
+  <div style="font-size:16px; font-weight:500; color:#333;">Загрузка...</div>
+</div>
+
+
+<script>
+window.addEventListener('load', () => {
+  const loader = document.getElementById('loader');
+  if (loader) loader.remove();
+});
+</script>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const faqBtn = document.getElementById("faqBtn");
+  const faqBox = document.getElementById("faqHoverBox");
+
+  faqBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    faqBox.classList.toggle("active");
+  });
+
+  document.addEventListener("click", (e) => {
+    if (!faqBox.contains(e.target) && !faqBtn.contains(e.target)) {
+      faqBox.classList.remove("active");
+    }
+  });
+});
+</script>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const modal = document.getElementById("qrModal");
+  const modalImg = document.getElementById("qrModalImg");
+  const closeBtn = modal.querySelector(".qr-close");
+
+  document.querySelectorAll(".qr-code").forEach(img => {
+    img.addEventListener("click", () => {
+      modal.style.display = "flex";
+      modalImg.src = img.src;
+    });
+  });
+
+  closeBtn.addEventListener("click", () => {
+    modal.style.display = "none";
+  });
+  modal.addEventListener("click", e => {
+    if (e.target === modal) modal.style.display = "none";
+  });
+});
+document.querySelectorAll('.upload-form').forEach(form => {
+  const source = form.querySelector('input[name="source"]').value;
+  const block = form.closest('.payment-block');
+  if (localStorage.getItem(`payment_sent_${source}`) === '1') {
+    block.classList.add('disabled');
+  }
+});
+
+</script>
+<div id="qrModal" class="qr-modal">
+  <span class="qr-close">&times;</span>
+  <img id="qrModalImg" class="qr-modal-content">
+</div>
+<script>
+document.querySelectorAll('.upload-form').forEach(form => {
+  const source = form.querySelector('input[name="source"]').value;
+  const block = form.closest('.payment-block');
+  const resetBtn = form.querySelector('.reset-btn');
+
+  // Если заявка уже отправлена — блокируем карточку и показываем кнопку сброса
+  if (localStorage.getItem(`payment_sent_${source}`) === '1') {
+    block.classList.add('disabled');
+    if (resetBtn) resetBtn.style.display = 'block';
+  }
+
+  // Обработка клика по кнопке сброса
+  if (resetBtn) {
+    resetBtn.addEventListener('click', () => {
+      localStorage.removeItem(`payment_sent_${source}`);
+      block.classList.remove('disabled');
+      resetBtn.style.display = 'none';
+    });
+  }
+});
+
+</script>
+<button id="resetAll" class="reset-all-btn">
+  <img src="/static/icons/clear-16.svg" alt="Сбросить" class="reset-icon">
+</button>
+
+
+
+
+<script>
+document.getElementById('resetAll').addEventListener('click', () => {
+  document.querySelectorAll('input[name="source"]').forEach(input => {
+    const key = `payment_sent_${input.value}`;
+    localStorage.removeItem(key);
+  });
+  location.reload();
+});
+</script>
+
+</body>
+</html>

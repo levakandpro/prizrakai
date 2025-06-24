@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Админка — Заявки на оплату</title>
+  <style>
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0; padding: 0;
+      background: #f0f2f5;
+      font-family: 'Segoe UI', sans-serif;
+      color: #1a1a1a;
+    }
+    .container {
+      max-width: 1280px;
+      margin: 50px auto;
+      padding: 24px;
+    }
+    h1 {
+      font-size: 36px;
+      margin-bottom: 32px;
+      font-weight: 700;
+    }
+    h2 {
+      font-size: 24px;
+      margin: 40px 0 20px;
+      font-weight: 600;
+      border-bottom: 2px solid #e0e0e0;
+      padding-bottom: 6px;
+    }
+    .grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 24px;
+    }
+    .accounts-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+      margin-top: 20px;
+    }
+    .account-card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+    .account-card p {
+      margin: 8px 0;
+    }
+    .account-card.tariff-premium {
+  border: 2px solid #a855f7;
+  background: #f9f5ff;
+}
+
+.account-card.tariff-free {
+  border: 2px solid #ffa726;
+  background: #fffaf3;
+}
+
+.account-card.tariff-disabled {
+  border: 2px solid #ccc;
+  background: #f5f5f5;
+  opacity: 0.7;
+}
+
+    .toggle-tariff {
+      padding: 8px 12px;
+      border: none;
+      border-radius: 6px;
+      background: #f3f3f3;
+      cursor: pointer;
+    }
+    .card {
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 6px 24px rgba(0,0,0,0.05);
+      padding: 20px;
+      font-size: 14px;
+      color: #333;
+      width: 320px;
+      max-width: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: all 0.25s ease;
+    }
+    .card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 32px rgba(0,0,0,0.08);
+    }
+    .card .header {
+      font-weight: 600;
+      font-size: 16px;
+      margin-bottom: 8px;
+    }
+    .card .info {
+      color: #666;
+      font-size: 13px;
+      margin-bottom: 8px;
+    }
+    .card .status {
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+    .card .status.pending {
+      color: #d08700;
+    }
+    .card .status.confirmed {
+      color: #218838;
+    }
+    .card img {
+      border-radius: 10px;
+      margin-top: 12px;
+      max-width: 100%;
+      object-fit: cover;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+    .btn {
+      padding: 8px 14px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: background 0.2s ease;
+    }
+    .btn-confirm-all {
+      background: #4caf50;
+      color: white;
+      margin: 16px 0;
+    }
+    .btn-delete {
+      background: #ef5350;
+      color: white;
+    }
+    .btn-delete:hover {
+      background: #e53935;
+    }
+    footer {
+      text-align: center;
+      padding: 24px;
+      font-size: 13px;
+      color: #999;
+    }
+    .summary-card {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  margin: 24px 0 48px;
+  background: #fff;
+  padding: 20px 24px;
+  border-radius: 14px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.04);
+  flex-wrap: wrap;
+}
+
+.summary-card .stat {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 100px;
+}
+
+.stat-label {
+  font-size: 13px;
+  color: #666;
+  margin-bottom: 4px;
+  font-weight: 500;
+}
+
+.stat-value {
+  font-size: 22px;
+  font-weight: 700;
+  color: #111;
+}
+
+.stat-value.pending {
+  color: #d08700;
+}
+
+.stat-value.confirmed {
+  color: #28a745;
+}
+.card .meta {
+  margin-bottom: 12px;
+  font-size: 13px;
+  line-height: 1.4;
+  color: #444;
+}
+
+.card .meta .email {
+  font-weight: 600;
+  font-size: 14px;
+  margin-bottom: 2px;
+}
+
+.card .meta .time {
+  color: #777;
+  font-size: 12px;
+}
+
+.card .meta .status {
+  margin-top: 6px;
+  font-weight: 600;
+}
+
+.card .meta .status.pending {
+  color: #d08700;
+}
+
+.card .meta .status.confirmed {
+  color: #28a745;
+}
+.meta {
+  margin-bottom: 12px;
+  font-size: 13px;
+  line-height: 1.4;
+  color: #444;
+}
+.meta .email {
+  font-weight: 600;
+  font-size: 14px;
+  margin-bottom: 2px;
+}
+.meta .time {
+  color: #777;
+  font-size: 12px;
+}
+.meta .status {
+  margin-top: 6px;
+  font-weight: 600;
+}
+.meta .status.pending {
+  color: #d08700;
+}
+.meta .status.confirmed {
+  color: #28a745;
+}
+.screenshot {
+  margin: 12px 0;
+  max-width: 100%;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+  cursor: zoom-in;
+}
+.actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+.section-icon {
+  width: 20px;
+  height: 20px;
+  margin-right: 8px;
+  vertical-align: middle;
+  opacity: 0.8;
+}
+.btn-clear-trash {
+  margin: 24px auto;
+  display: block;
+  background: #444;
+  color: #fff;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+.btn-clear-trash:hover {
+  background: #222;
+}
+
+.trash-header {
+  margin-top: 48px;
+  font-size: 20px;
+  font-weight: 600;
+  border-bottom: 2px solid #ccc;
+  padding-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+#trash-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  margin-top: 20px;
+}
+
+#trash-grid .card {
+  border: 2px dashed #999;
+  background: #fafafa;
+  opacity: 0.85;
+  transition: box-shadow 0.2s ease;
+}
+
+#trash-grid .card:hover {
+  box-shadow: 0 0 0 2px #ff6f61;
+}
+
+.trash-header {
+  margin-top: 48px;
+  font-size: 22px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #444;
+  border-bottom: 2px solid #e0e0e0;
+  padding-bottom: 6px;
+}
+
+  </style>
+</head>
+<body>
+  <div class="container">
+<h2 class="new">Заявки</h2>
+<div class="summary-card">
+  <div class="stat">
+    <div class="stat-label">Всего</div>
+    <div class="stat-value" id="count-total">0</div>
+  </div>
+  <div class="stat">
+    <div class="stat-label">🕒 Ожидают</div>
+    <div class="stat-value pending" id="count-pending">0</div>
+  </div>
+  <div class="stat">
+    <div class="stat-label">✅ Подтверждено</div>
+    <div class="stat-value confirmed" id="count-confirmed">0</div>
+  </div>
+  <button class="btn btn-confirm-all">✅ Подтвердить выбранные</button>
+</div>
+<div class="grid"></div>
+
+
+
+<h2 class="new">
+  <img src="/static/icons/newzak.svg" class="section-icon" alt="новые"> Новые заявки
+</h2>
+<div class="grid" id="cards-pending"></div>
+
+<h2 class="confirmed">
+  <img src="/static/icons/veric.svg" class="section-icon" alt="подтверждённые"> Подтверждённые
+</h2>
+<div class="grid" id="cards-confirmed"></div>
+
+<h2 class="accounts-header">
+  <img src="/static/icons/tensorflow.svg" class="section-icon" alt="аккаунты"> Аккаунты с заявками
+</h2>
+<div class="accounts-grid" id="accounts-grid"></div>
+
+<h2 class="trash-header">
+  <img src="/static/icons/clear.svg" class="section-icon" alt="корзина"> Корзина удалённых
+</h2>
+<div class="grid" id="trash-grid"></div>
+<button id="clear-trash" class="btn-clear-trash">🗑 Очистить корзину</button>
+
+    <footer>© PRIZRAK SYSTEMS</footer>
+  </div>
+
+<script>
+  fetch("/get_all_users")
+    .then(res => res.json())
+    .then(users => {
+      const grid = document.getElementById("accounts-grid");
+      grid.innerHTML = "";
+
+      users.forEach(user => {
+        const card = document.createElement("div");
+        card.className = "account-card";
+
+        if (user.tariff === "PREMIUM") {
+          card.classList.add("tariff-premium");
+        } else if (user.tariff === "FREE") {
+          card.classList.add("tariff-free");
+        } else {
+          card.classList.add("tariff-disabled");
+        }
+
+        const btnText = user.tariff === "PREMIUM" ? "Отключить PREMIUM" : "Включить PREMIUM";
+        const btnAction = user.tariff === "PREMIUM" ? "revoke" : "grant";
+
+        card.innerHTML = `
+          <p><strong>${user.email}</strong></p>
+          <p>Тариф: ${user.tariff}</p>
+          <button class="toggle-tariff" data-email="${user.email}" data-action="${btnAction}">
+            ${btnText}
+          </button>
+        `;
+
+        grid.appendChild(card);
+      });
+    });
+    
+</script>
+<script>
+document.addEventListener("click", (e) => {
+  if (!e.target.matches(".toggle-tariff")) return;
+
+  const btn = e.target;
+  const email = btn.dataset.email;
+  const action = btn.dataset.action;
+
+  fetch("/toggle_tariff", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, action })
+  })
+  .then(res => res.json())
+  .then(result => {
+    if (result.success) {
+      fetch('/get_requests')
+        .then(res => res.json())
+        .then(data => {
+          const latestByEmail = {};
+          data.forEach(entry => {
+            if (!entry.time && !entry.date) return;
+            const t = new Date(entry.time || entry.date).getTime();
+            const current = latestByEmail[entry.email];
+            const currentTime = current ? new Date(current.time || current.date).getTime() : 0;
+            if (!current || t > currentTime) {
+              latestByEmail[entry.email] = entry;
+            }
+          });
+
+          const newGrid = document.getElementById("cards-pending");
+          const confirmedGrid = document.getElementById("cards-confirmed");
+          newGrid.innerHTML = "";
+          confirmedGrid.innerHTML = "";
+
+          Object.values(latestByEmail).forEach(entry => {
+            const isConfirmed = entry.status === 'confirmed';
+            const createdAt = entry.time ? new Date(entry.time) : null;
+            const now = new Date();
+            const minutesAgo = createdAt ? Math.floor((now - createdAt) / 60000) : null;
+            const agoText = minutesAgo !== null ? `${minutesAgo} мин назад` : '';
+
+            const card = document.createElement('div');
+            card.className = 'card' + (isConfirmed ? '' : ' new');
+            card.innerHTML = `
+              <div class="meta">
+                <div class="email">${entry.email}</div>
+                <div class="time">${entry.time ? new Date(entry.time).toLocaleString('ru-RU') : ''} ${agoText ? `— 🕓 ${agoText}` : ''}</div>
+                <div class="status ${entry.status}">${entry.status === 'confirmed' ? '✅ Подтверждено' : '🕒 Ожидает'}</div>
+              </div>
+              ${entry.filename ? `<img src="/static/uploads/${entry.filename}" class="screenshot">` : ''}
+              <div class="actions">
+                ${!isConfirmed ? `<input type="checkbox" class="checkbox">` : ''}
+                ${!isConfirmed ? `<button class="btn btn-confirm">Подтвердить</button>` : ''}
+                <button class="btn btn-delete">🗑 Удалить</button>
+              </div>
+            `;
+            (isConfirmed ? confirmedGrid : newGrid).appendChild(card);
+          });
+
+          updateSummary();
+        });
+    } else {
+      alert("❌ Ошибка при обновлении тарифа");
+    }
+  });
+});
+
+
+</script>
+<script>
+  function loadTrash() {
+    fetch("/get_trash")
+      .then(res => res.json())
+      .then(trash => {
+        const grid = document.getElementById("trash-grid");
+        grid.innerHTML = "";
+
+        trash.reverse().forEach(entry => {
+          const card = document.createElement("div");
+          card.className = "card";
+          card.innerHTML = `
+            <div class="header">${entry.email}</div>
+            <div class="info">${entry.time || entry.date || ''}</div>
+            ${entry.filename ? `<img src="/static/uploads/${entry.filename}" style="margin: 12px 0; max-width: 100%; border-radius: 8px;">` : ''}
+            <button class="btn-delete" data-fn="${entry.filename}">Удалить из корзины</button>
+          `;
+          grid.appendChild(card);
+        });
+      });
+  }
+
+  document.getElementById("clear-trash").addEventListener("click", () => {
+    if (!confirm("Очистить корзину полностью?")) return;
+    fetch("/clear_trash", { method: "POST" }).then(() => loadTrash());
+  });
+
+  let selectedTrashFile = null;
+
+  document.addEventListener("click", e => {
+    if (e.target.matches(".btn-delete[data-fn]")) {
+      console.log("Клик по Удалить из корзины");
+      selectedTrashFile = e.target.dataset.fn;
+      document.getElementById("trash-modal").style.display = "flex";
+    }
+
+    if (e.target.id === "delete-forever-btn" && selectedTrashFile) {
+      fetch("/remove_from_trash", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ filename: selectedTrashFile })
+      }).then(() => {
+        selectedTrashFile = null;
+        document.getElementById("trash-modal").style.display = "none";
+        loadTrash();
+      });
+    }
+
+    if (e.target.id === "restore-btn" && selectedTrashFile) {
+      fetch("/restore_from_trash", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ filename: selectedTrashFile })
+      }).then(() => {
+        selectedTrashFile = null;
+        document.getElementById("trash-modal").style.display = "none";
+        loadTrash();
+        loadPayments?.();
+      });
+    }
+
+    if (e.target.id === "cancel-trash-modal") {
+      selectedTrashFile = null;
+      document.getElementById("trash-modal").style.display = "none";
+    }
+  });
+
+  loadTrash();
+  function updateSummary() {
+  const cards = document.querySelectorAll('.card');
+  const total = cards.length;
+  const pending = [...cards].filter(c => c.classList.contains('new')).length;
+  const confirmed = total - pending;
+
+  document.getElementById('count-total').textContent = total;
+  document.getElementById('count-pending').textContent = pending;
+  document.getElementById('count-confirmed').textContent = confirmed;
+}
+
+</script>
+
+  </script>
+  
+  <script src="{{ url_for('static', filename='admin.js') }}?v=1021"></script>
+  <div id="trash-modal" style="display:none;" class="trash-modal">
+  <div class="modal-content">
+    <p id="trash-modal-text">Что сделать с заявкой?</p>
+    <div class="modal-actions">
+      <button id="restore-btn" class="btn-restore">♻️ Вернуть</button>
+      <button id="delete-forever-btn" class="btn-delete-forever">❌ Удалить навсегда</button>
+      <button id="cancel-trash-modal" class="btn-cancel">✖ Закрыть</button>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

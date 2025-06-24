@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Оплата функции</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body {
+      background: #111;
+      color: #fff;
+      font-family: 'Montserrat', sans-serif;
+      margin: 0;
+      padding: 40px;
+      text-align: center;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #ff00cc, #3333ff);
+      border: none;
+      padding: 12px 24px;
+      font-size: 16px;
+      color: #fff;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .btn-primary:hover {
+      opacity: 0.9;
+    }
+    .form-control {
+      display: block;
+      width: 100%;
+      max-width: 300px;
+      margin: 10px auto;
+      padding: 10px 14px;
+      border-radius: 8px;
+      border: 1px solid #aaa;
+      background: #222;
+      color: #fff;
+    }
+    .glass-modal {
+      display: none;
+      position: fixed;
+      z-index: 9999;
+      left: 0; top: 0;
+      width: 100%; height: 100%;
+      backdrop-filter: blur(14px);
+      background: rgba(0, 0, 0, 0.75);
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .glass-content {
+      background: rgba(20, 20, 20, 0.95);
+      color: #fff;
+      border-radius: 16px;
+      padding: 30px 24px 40px;
+      width: 100%;
+      max-width: 420px;
+      box-shadow: 0 0 30px rgba(0, 0, 0, 0.6);
+      position: relative;
+    }
+    .close-btn {
+      position: absolute;
+      right: 16px;
+      top: 16px;
+      background: none;
+      color: #ff66cc;
+      font-size: 20px;
+      border: none;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Премиум-доступ</h1>
+  <p>Нажмите, чтобы оплатить и разблокировать функцию</p>
+  <button class="btn-primary" onclick="openPaymentModal()">Оплатить</button>
+
+  <!-- 💳 Модалка оплаты -->
+  <div id="paymentModal" class="glass-modal">
+    <div class="glass-content">
+      <button class="close-btn" onclick="closePaymentModal()">×</button>
+      <h2>Оплата 30 сомони</h2>
+      <p>Сканируйте QR и прикрепите скриншот оплаты</p>
+      <img src="static/qr-dushanbe.png" alt="QR Code" style="width:180px; margin: 10px auto;">
+      <input type="text" id="payName" placeholder="Ваше имя" class="form-control">
+      <input type="file" id="payScreenshot" accept="image/*" class="form-control">
+      <button class="btn-primary" onclick="sendPayment()">Я оплатил</button>
+    </div>
+  </div>
+
+  <script>
+    function openPaymentModal() {
+      document.getElementById('paymentModal').style.display = 'flex';
+    }
+
+    function closePaymentModal() {
+      document.getElementById('paymentModal').style.display = 'none';
+    }
+
+    function sendPayment() {
+      const name = document.getElementById('payName').value;
+      const file = document.getElementById('payScreenshot').files[0];
+
+      if (!name || !file) {
+        alert('Заполните все поля и прикрепите скрин!');
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append('name', name);
+      formData.append('screenshot', file);
+
+      fetch('http://127.0.0.1:5000/submit_payment', {
+        method: 'POST',
+        body: formData
+      })
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            alert('Заявка отправлена. Ожидайте подтверждения.');
+            closePaymentModal();
+          } else {
+            alert('Ошибка: ' + data.message);
+          }
+        })
+        .catch(() => alert('Ошибка при отправке запроса.'));
+    }
+  </script>
+
+</body>
+</html>

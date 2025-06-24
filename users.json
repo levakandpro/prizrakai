@@ -1,0 +1,36 @@
+[
+  {
+    "email": "natopchane@gmail.com",
+    "name": "На ТОПчане",
+    "tariff": "PREMIUM",
+    "tariff_expires": null
+  },
+  {
+    "id": "107eb9a5-bd1e-41d4-b844-f84e8a53df1b",
+    "email": "ilovebokhtar@gmail.com",
+    "name": "juuu ptuid (Курган тюбе)",
+    "tariff": "FREE",
+    "tariff_expires": null
+  },
+  {
+    "id": "568bacf8-64e7-4ebd-9ff1-b9b1db06b8c0",
+    "email": "levakandproduction@gmail.com",
+    "name": "Levakand Production",
+    "tariff": "FREE",
+    "tariff_expires": "2025-07-16"
+  },
+  {
+    "id": "e2593823-f598-46d3-bb69-9cc0e5e9ee12",
+    "email": "millionmillioff@gmail.com",
+    "name": "Millioner Mili",
+    "tariff": "FREE",
+    "tariff_expires": "2025-07-16"
+  },
+  {
+    "id": "7e6f6313-4f52-46bb-92b4-858898af8af5",
+    "email": "bozzori.music@gmail.com",
+    "name": "Bozzori music",
+    "tariff": "FREE",
+    "tariff_expires": "2025-07-16"
+  }
+]

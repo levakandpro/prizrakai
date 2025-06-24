@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Админка — Заявки на оплату</title>
+  <style>
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0; padding: 0; height: 100vh;
+      background: #0a0a0a;
+      font-family: 'Segoe UI', sans-serif;
+      color: #fff;
+      overflow: hidden;
+    }
+    .card-outer {
+      max-width: 1240px;
+      height: calc(100vh - 80px);
+      margin: 40px auto;
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 24px;
+      padding: 30px;
+      box-shadow: 0 12px 60px rgba(0,0,0,0.5);
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    h1 {
+      font-size: 36px; font-weight: 800;
+      background: linear-gradient(to right, #00ffe7, #ad00ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin: 0;
+    }
+    .summary-card {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(0,255,128,0.6);
+      border-radius: 18px;
+      padding: 20px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 16px;
+      box-shadow: 0 4px 20px rgba(0,255,128,0.2);
+    }
+    .summary-card .pill {
+      background: #1a1a1a;
+      padding: 10px 18px;
+      border-radius: 14px;
+      border: 1px solid #333;
+      font-size: 14px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .summary-card .pill.total { color: #ccc; }
+    .summary-card .pill.pending { color: #f39c12; }
+    .summary-card .pill.confirmed { color: #2ecc71; }
+    .summary-card .btn-confirm-all {
+      margin-left: auto;
+      padding: 12px 28px;
+      font-size: 15px;
+      font-weight: 600;
+      border: 1px solid #00ff88;
+      border-radius: 14px;
+      background: #000;
+      color: #00ffbb;
+      box-shadow: 0 0 8px rgba(0,255,150,0.3);
+      cursor: pointer;
+    }
+    .summary-card .filter {
+      margin-left:  auto;
+      background: #1a1a1a;
+      color: #fff;
+      border: 1px solid #333;
+      padding: 10px 14px;
+      border-radius: 12px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    h2 {
+      font-size: 18px; font-weight: 600;
+      margin: 0 0 10px;
+    }
+    h2.new { color: #f39c12; }
+    h2.confirmed { color: #2ecc71; }
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+    .card {
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 18px;
+      padding: 20px;
+      position: relative;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.35);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .card.new { border-color: #f39c12; box-shadow: 0 0 12px rgba(243,156,18,0.3); }
+    .card .header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 600;
+      font-size: 16px;
+    }
+    .card .header .icon { font-size: 18px; }
+    .card .header .badge-dot {
+      width: 10px; height: 10px; border-radius:50%;
+      background: #f39c12;
+      box-shadow: 0 0 6px rgba(243,156,18,0.6);
+    }
+    .card .info {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      color: #aaa;
+    }
+    .card .status {
+      font-size: 15px; font-weight:500;
+    }
+    .card .status.pending { color: #f39c12; }
+    .card .status.confirmed { color: #2ecc71; }
+    .card img {
+      width: 160px; height: auto;
+      border-radius: 8px; border:1px solid #333;
+      background: #111;
+    }
+    .card .btn {
+      align-self: flex-start;
+      padding: 10px 20px;
+      font-size: 14px;
+      font-weight:600;
+      border:none; border-radius:12px;
+      background: #00ffc8;
+      background: linear-gradient(to right, #00ffc8,#00b7ff);
+      color:#000;
+      box-shadow:0 2px 8px rgba(0,255,200,0.25);
+      cursor:pointer;
+    }
+    .card .delayed {
+      font-size: 12px; color:#f39c12;
+    }
+    .card .star-toggle {
+      position:absolute; top:16px; right:16px;
+      font-size:18px; color:#444; cursor:pointer;
+    }
+    .card .star-toggle.active {
+      color:#ffd700; text-shadow:0 0 6px rgba(255,215,0,0.5);
+    }
+    .card .checkbox {
+      position:absolute; bottom:16px; right:16px;
+      width:18px; height:18px;
+      appearance:none; border:2px solid #888;
+      border-radius:4px; background:transparent;
+      cursor:pointer;
+    }
+    .card .checkbox:checked {
+      background: linear-gradient(to right,#00ffc8,#00aaff);
+      border-color:transparent;
+    }
+    .card .checkbox:checked::after {
+      content:'✓'; position:absolute; left:2px; top:-1px;
+      font-size:14px; color:#000; font-weight:bold;
+    }
+    footer {
+      position:fixed; bottom:0; left:0; width:100%;
+      background:#0a0a0a; color:#777; text-align:center;
+      font-size:13px; padding:14px 0;
+      border-top:1px solid rgba(255,255,255,0.05);
+    }
+    .card-outer {
+  height: 100vh;
+  overflow: hidden;
+}
+.card-outer {
+  margin: 15px auto;               /* 40px сверху и снизу */
+  height: calc(100vh - 80px);      /* вычитаем по 40px сверху и снизу */
+  overflow: hidden;                /* отключаем прокрутку */
+}
+/* Скрываем детали, когда карточка в .collapsed */
+.card.collapsed .info,
+.card.collapsed .status,
+.card.collapsed img,
+.card.collapsed .btn,
+.card.collapsed .delayed,
+.card.collapsed .checkbox,
+.card.collapsed .star-toggle {
+  display: none;
+}
+/* --- СТИЛИ ДЛЯ СВЁТЛЫХ ПИЛЛОВ В ШАПКЕ --- */
+.summary-card .pill {
+  background: #1a1a1a;
+  padding: 10px 18px;
+  border-radius: 14px;
+  border: 1px solid #333;
+  font-size: 14px;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.summary-card .pill.total { color: #ccc; }
+.summary-card .pill.pending {
+  color: #f39c12;
+}
+.summary-card .pill.confirmed {
+  color: #2ecc71;
+}
+
+/* --- СТРОКА ИМЕНИ С ТОЧКОЙ --- */
+.card .header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  font-size: 16px;
+  color: #fff;
+}
+.card .header .badge-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+}
+.card .header .badge-dot.pending {
+  background: #f39c12;
+  box-shadow: 0 0 6px rgba(243,156,18,0.6);
+}
+.card .header .badge-dot.confirmed {
+  background: #2ecc71;
+  box-shadow: 0 0 6px rgba(46,204,113,0.6);
+}
+
+/* --- СТАТУС ТЕКСТА --- */
+.card .status {
+  font-size: 15px;
+  font-weight: 500;
+}
+.card .status.pending {
+  color: #f39c12;
+}
+.card .status.confirmed {
+  color: #2ecc71;
+}
+.card-outer {
+  height: calc(100vh - 80px); /* оставляем тот же размер */
+  overflow-y: auto;           /* включаем вертикальную прокрутку */
+}
+
+  </style>
+</head>
+<body>
+  <div class="card-outer">
+    <h1>$ ЗАЯВКИ НА ОПЛАТУ</h1>
+
+    <!-- ОТДЕЛЬНАЯ КАРТОЧКА С ИТОГАМИ -->
+    <div class="summary-card">
+      <div class="pill total">Всего: <strong>3</strong></div>
+      <div class="pill pending">🕒 Ожидают: <strong>2</strong></div>
+      <div class="pill confirmed">✅ Подтверждено: <strong>1</strong></div>
+      <button class="btn-confirm-all">✅ Подтвердить выбранные</button>
+      <select class="filter">
+        <option>🗂 Все заявки</option>
+        <option>🆕 Только новые</option>
+        <option>⏳ Только старые (24ч+)</option>
+        <option>✅ Только подтвержденные</option>
+      </select>
+    </div>
+
+    <!-- НОВЫЕ ЗАЯВКИ -->
+    <h2 class="new">🆕 Новые заявки</h2>
+    <div class="grid">
+      <div class="card new">
+        <div class="header">
+          <span class="icon">👤</span>
+          <div class="badge-dot" title="Ожидает"></div>
+          Мухаммадзода
+        </div>
+        <div class="info">
+          <span>🕓</span> 2025-05-21 03:21
+        </div>
+        <div class="status pending">Ожидает подтверждения</div>
+        <img src="не_существует.png" alt="скрин" onerror="this.onerror=null;this.src='static/good.gif'">
+        <button class="btn">✅ Подтвердить</button>
+        <div class="delayed">⏳ 24+ ЧАСА</div>
+        <div class="star-toggle">☆</div>
+        <input type="checkbox" class="checkbox">
+      </div>
+    </div>
+
+    <!-- ПОДТВЕРЖДЁННЫЕ ЗАЯВКИ -->
+    <h2 class="confirmed">✅ Подтверждённые заявки</h2>
+    <div class="grid">
+      <div class="card">
+        <div class="header">
+          <span class="icon">👤</span>
+          <div class="badge-dot" style="background:#2ecc71;box-shadow:0 0 6px rgba(46,204,113,0.6)" title="Подтверждено"></div>
+          Исмоилов
+        </div>
+        <div class="info">
+          <span>🕓</span> 2025-05-21 03:37
+        </div>
+        <div class="status confirmed">Подтверждено</div>
+        <img src="не_существует.png" alt="скрин" onerror="this.onerror=null;this.src='static/good1.gif'">
+        <div class="star-toggle">☆</div>
+        <input type="checkbox" class="checkbox">
+      </div>
+    </div>
+
+  </div>
+  <footer>PROD BY <span style="color:#fff;font-weight:600;">LEVAKAND</span></footer>
+</body>
+  <script src="admin.js"></script>
+</html>

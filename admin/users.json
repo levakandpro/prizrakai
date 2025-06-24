@@ -1,0 +1,14 @@
+[
+  {
+    "email": "client@example.com",
+    "status": "pending",
+    "filename": "20250616-001_screen.png",
+    "time": "2025-06-16 14:22"
+  },
+  {
+    "email": "admin@example.com",
+    "status": "confirmed",
+    "filename": "20250614-clip.png",
+    "time": "2025-06-14 09:13"
+  }
+]
