@@ -1,3 +1,5 @@
 Flask
-edge-tts
 flask_login
+flask_dance
+requests
+edge-tts
