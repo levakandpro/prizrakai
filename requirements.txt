@@ -3,4 +3,5 @@ edge-tts
 gunicorn
 flask_login
 waitress
-flask_dance==6.3.0
+flask_dance
+
