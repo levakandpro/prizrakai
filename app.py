@@ -304,6 +304,7 @@ def add_cache_headers(response):
 
 if __name__ == "__main__":
     import logging
+    import os
     from waitress import serve
 
     logging.basicConfig(level=logging.DEBUG)
@@ -313,5 +314,6 @@ if __name__ == "__main__":
         if v["LangGroup"] == "ru":
             print(f"- {v['ShortName']} — {v['FriendlyName']}")
 
-    serve(app, host="0.0.0.0", port=10000)
+    port = int(os.environ.get("PORT", 5000))
+    serve(app, host="0.0.0.0", port=port)
 
