@@ -304,11 +304,14 @@ def add_cache_headers(response):
 
 if __name__ == "__main__":
     import logging
+    from waitress import serve
+
     logging.basicConfig(level=logging.DEBUG)
 
     print("\n📢 Русские голоса:")
     for v in SUPPORTED_VOICES:
         if v["LangGroup"] == "ru":
             print(f"- {v['ShortName']} — {v['FriendlyName']}")
-    
-    app.run(host="0.0.0.0", port=5000, debug=True)
+
+    serve(app, host="0.0.0.0", port=10000)
+
