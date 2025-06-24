@@ -30,12 +30,12 @@ if not os.path.exists(PAYMENTS_FILE):
 # 🔐 Google OAuth
 os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
 google_bp = make_google_blueprint(
-    client_id="1064380848188-...",
-    client_secret="GOCSPX-...",
-    redirect_url="https://prizrakai.onrender.com/login/google/authorized",
+    client_id="1064380848188-km1nu23hskriqqtq8vims5vtc6ido6bi.apps.googleusercontent.com",
+    client_secret="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",
     scope=["openid", "https://www.googleapis.com/auth/userinfo.profile", "https://www.googleapis.com/auth/userinfo.email"],
     redirect_to="google_login"
 )
+
 
 app.register_blueprint(google_bp, url_prefix="/login")
 
